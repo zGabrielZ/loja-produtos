@@ -1,0 +1,52 @@
+server:
+  port: 8081
+  servlet:
+    context-path: '/api-produtos/'
+
+spring:
+  application:
+    name: produtos
+  datasource:
+    url: jdbc:postgresql://localhost:5000/produto?currentSchema=dev
+    username: gabriel
+    password: gabriel
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: gabriel
+    password: gabriel
+
+broker:
+  exchange:
+    pedido:
+      notificacao:
+        event: ms.produto.notificacaoevent
+  key:
+    pedido:
+      notificacao:
+        event: ms.produto.notificacaoevent.key
+  queue:
+    pedido:
+      notificacao:
+        event: ms.produto.notificacaoevent.queue
+
+logging:
+  level:
+    org:
+      flywaydb: DEBUG
+    br.com.gabrielferreira.produtos: TRACE
+
+eureka:
+  client:
+    service-url:
+      default-zone: 'http://localhost:8761/eureka'
+  instance:
+    hostname: localhost

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pedidos</title>
+    <style>
+        table {
+            width: 25%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 18px;
+            text-align: left;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        thead {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <p th:text="${descricao}"></p>
+
+        <p>Código do pedido:  <span th:text="${codigoPedido}"></span> </p>
+        <p>Data do pedido:  <span th:text="${dataPedido}"></span> </p>
+        <p>Data do pedido finalizado:  <span th:text="${dataPedidoFinalizado}"></span> </p>
+        <p>Data do pedido cancelado: <span th:text="${dataPedidoCancelado}"></span> </p>
+        <p>Status do pedido: <span th:text="${statusPedido}"></span> </p>
+
+        <table border="1">
+            <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Valor do produto</th>
+                <th>Quantidade</th>
+                <th>Subtotal</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${itensPedidos}">
+                <td th:text="${item.produto}"></td>
+                <td th:text="${item.valorProduto}"></td>
+                <td th:text="${item.quantidade}"></td>
+                <td th:text="${item.subtotal}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <p>Valor total do pedido:  <span th:text="${valorTotalPedido}"></span> </p>
+    </div>
+</body>
+</html>

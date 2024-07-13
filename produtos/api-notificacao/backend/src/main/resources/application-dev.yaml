@@ -1,0 +1,72 @@
+server:
+  port: 8082
+  servlet:
+    context-path: '/api-notificacao/'
+
+spring:
+  application:
+    name: notificacao
+  datasource:
+    url: jdbc:postgresql://localhost:5000/notificacao?currentSchema=dev
+    username: gabriel
+    password: gabriel
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  mail:
+    host: ${SMTP}
+    port: ${SMTP_PORTA}
+    username: ${EMAIL_REMETENTE}
+    password: ${SENHA_REMETENTE}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: gabriel
+    password: gabriel
+    listener:
+      simple:
+        default-requeue-rejected: false #Não faz o loop quando der o exception
+
+broker:
+  exchange:
+    pedido:
+      notificacao:
+        event: ms.produto.notificacaoevent
+        dlx: ms.produto.notificacaoevent.dlx
+        pl: ms.produto.notificacaoevent.pl
+  key:
+    pedido:
+      notificacao:
+        event: ms.produto.notificacaoevent.key
+        dlx: ms.produto.notificacaoevent.key.dlx
+        pl: ms.produto.notificacaoevent.key.pl
+  queue:
+    pedido:
+      notificacao:
+        event: ms.produto.notificacaoevent.queue
+        dlq: ms.produto.notificacaoevent.queue.dlq
+        pl: ms.produto.notificacaoevent.queue.pl
+
+logging:
+  level:
+    org:
+      flywaydb: DEBUG
+    br.com.gabrielferreira.notificacao: TRACE
+
+eureka:
+  client:
+    service-url:
+      default-zone: 'http://localhost:8761/eureka'
+  instance:
+    hostname: localhost

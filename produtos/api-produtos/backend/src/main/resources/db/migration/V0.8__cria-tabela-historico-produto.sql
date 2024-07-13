@@ -1,0 +1,11 @@
+create table TB_HISTORICO_PRODUTO(
+   ID bigserial primary key,
+   NOME varchar(255) not null,
+   PRECO decimal(10, 2) not null,
+   ID_PRODUTO bigserial not null,
+   DATA_INCLUSAO TIMESTAMP not null
+);
+
+ALTER TABLE TB_HISTORICO_PRODUTO add constraint CK_HISTORICO_PRODUTO_NOME unique(NOME);
+ALTER TABLE TB_HISTORICO_PRODUTO ALTER COLUMN DATA_INCLUSAO SET DEFAULT current_timestamp AT TIME ZONE 'UTC';
+ALTER TABLE TB_HISTORICO_PRODUTO ADD FOREIGN KEY (ID_PRODUTO) references TB_PRODUTO(ID);

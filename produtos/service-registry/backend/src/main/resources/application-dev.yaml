@@ -1,0 +1,11 @@
+server:
+  port: 8761
+
+spring:
+  application:
+    name: produtos-service-registry
+
+eureka:
+  client:
+    register-with-eureka: false # Não se registre no eureka
+    fetch-registry: false # Não buscar um registor no eureka

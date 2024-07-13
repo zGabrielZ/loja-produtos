@@ -1,0 +1,19 @@
+create table TB_NOTIFICACAO(
+    ID bigserial primary key,
+    NOME_REMETENTE varchar(255),
+    TITULO varchar(255),
+    EMAIL_TEMPLATE varchar(255),
+    STATUS varchar(255),
+    DATA_ATUAL_ERRO TIMESTAMP,
+    DESCRICAO_ERRO TEXT
+);
+
+ALTER TABLE TB_NOTIFICACAO ALTER COLUMN DATA_ATUAL_ERRO SET DEFAULT current_timestamp AT TIME ZONE 'UTC';
+
+create table TB_USUARIO_NOTIFICACAO(
+   ID bigserial primary key,
+   EMAIL varchar(255),
+   ID_NOTIFICACAO bigserial not null
+);
+
+ALTER TABLE TB_USUARIO_NOTIFICACAO ADD FOREIGN KEY (ID_NOTIFICACAO) REFERENCES TB_NOTIFICACAO(ID);
