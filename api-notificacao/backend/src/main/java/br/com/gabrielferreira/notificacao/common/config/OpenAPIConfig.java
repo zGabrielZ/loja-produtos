@@ -1,4 +1,4 @@
-package br.com.gabrielferreira.produtos.common.config;
+package br.com.gabrielferreira.notificacao.common.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -13,10 +13,10 @@ public class OpenAPIConfig {
     @Bean
     public OpenAPI openAPI(){
         Info info = new Info()
-                .title("API Produto")
+                .title("API Notificação")
                 .version("1.0")
                 .contact(contact())
-                .description("API de Produtos")
+                .description("API de Notificações")
                 .license(license());
 
         return new OpenAPI()
@@ -33,7 +33,7 @@ public class OpenAPIConfig {
 
     private License license(){
         License license = new License();
-        license.setName("Licença API Produtos");
+        license.setName("Licença API Notificações");
         return license;
     }
 

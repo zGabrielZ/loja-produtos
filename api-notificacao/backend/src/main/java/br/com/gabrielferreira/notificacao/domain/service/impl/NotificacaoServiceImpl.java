@@ -9,8 +9,13 @@ import br.com.gabrielferreira.notificacao.domain.service.EmailService;
 import br.com.gabrielferreira.notificacao.domain.service.NotificacaoService;
 import br.com.gabrielferreira.produtos.commons.dto.NotificacaoDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static br.com.gabrielferreira.notificacao.domain.specification.NotificacaoSpecification.*;
 
 @Service
 @RequiredArgsConstructor
@@ -40,5 +45,15 @@ public class NotificacaoServiceImpl implements NotificacaoService {
         notificacaoModel.setDestinatarios(usuarioNotificacaoMapper.toUsuariosNotificacoes(notificacao.getDestinatarios(), notificacaoModel));
         notificacaoRepository.save(notificacaoModel);
         return notificacao;
+    }
+
+    @Override
+    public Page<Notificacao> buscarNotificacoes(String titulo, NotificacaoStatusEnum status, Pageable pageable) {
+        Specification<Notificacao> specification = Specification.where(
+                buscarPorTitulo(titulo)
+                        .and(buscarPorStatus(status))
+        );
+
+        return notificacaoRepository.findAll(specification, pageable);
     }
 }
