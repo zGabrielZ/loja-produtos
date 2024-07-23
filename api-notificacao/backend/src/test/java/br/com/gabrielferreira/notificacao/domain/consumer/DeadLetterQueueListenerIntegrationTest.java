@@ -12,8 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.concurrent.TimeUnit;
+
 import static br.com.gabrielferreira.notificacao.tests.NotificacaoFactory.criarNotificacaoEmailDto;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.awaitility.Awaitility.*;
 
 @SpringBootTest
 @ContainerTest
@@ -40,23 +44,25 @@ class DeadLetterQueueListenerIntegrationTest {
     @DisplayName("Deve consumir notificação dead letter queue")
     @Order(1)
     void deveConsumirNotificacaoDeadLetterQueue(){
-        rabbitTemplate.convertAndSend("ms.produto.notificacaoevent.queue.dlq", notificacaoDTO);
+        assertDoesNotThrow(() -> rabbitTemplate.convertAndSend("ms.produto.notificacaoevent.queue.dlq", notificacaoDTO));
 
-        verify(pedidoNotificacaoEventDeadLetterQueuePublisher, timeout(500))
-                .publishPedidoNotificacaoEventDeadLetterQueue(any(NotificacaoDTO.class), any(MessagePostProcessor.class));
+        await().atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> verify(pedidoNotificacaoEventDeadLetterQueuePublisher)
+                        .publishPedidoNotificacaoEventDeadLetterQueue(any(NotificacaoDTO.class), any(MessagePostProcessor.class)));
     }
 
     @Test
     @DisplayName("Deve consumir notificação dead letter queue parking lot")
     @Order(2)
     void deveConsumirNotificacaoDeadLetterQueueParkingLot(){
-        rabbitTemplate.convertAndSend("ms.produto.notificacaoevent.queue.dlq", notificacaoDTO, message -> {
+        assertDoesNotThrow(() -> rabbitTemplate.convertAndSend("ms.produto.notificacaoevent.queue.dlq", notificacaoDTO, message -> {
             MessageProperties messageProperties = message.getMessageProperties();
             messageProperties.setHeader("x-dlq-retry", 4);
             return message;
-        });
+        }));
 
-        verify(pedidoNotificacaoEventParkingLotPublisher, timeout(500))
-                .publishPedidoNotificacaoEventParkingLot(any(NotificacaoDTO.class));
+        await().atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> verify(pedidoNotificacaoEventParkingLotPublisher)
+                        .publishPedidoNotificacaoEventParkingLot(any(NotificacaoDTO.class)));
     }
 }

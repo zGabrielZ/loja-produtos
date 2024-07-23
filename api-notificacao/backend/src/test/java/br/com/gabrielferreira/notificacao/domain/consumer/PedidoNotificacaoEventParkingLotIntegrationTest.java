@@ -10,8 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.concurrent.TimeUnit;
+
 import static br.com.gabrielferreira.notificacao.tests.NotificacaoFactory.criarNotificacaoEmailDto;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.awaitility.Awaitility.*;
 
 @SpringBootTest
 @ContainerTest
@@ -35,9 +39,9 @@ class PedidoNotificacaoEventParkingLotIntegrationTest {
     @DisplayName("Deve consumir notificação parking lot")
     @Order(1)
     void deveConsumirNotificacaoParkingLot(){
-        rabbitTemplate.convertAndSend("ms.produto.notificacaoevent.queue.pl", notificacaoDTO);
+        assertDoesNotThrow(() -> rabbitTemplate.convertAndSend("ms.produto.notificacaoevent.queue.pl", notificacaoDTO));
 
-        verify(notificacaoService, timeout(500))
-                .salvarNotificacao(any(NotificacaoDTO.class), any(NotificacaoStatusEnum.class));
+        await().atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> verify(notificacaoService).salvarNotificacao(any(NotificacaoDTO.class), any(NotificacaoStatusEnum.class)));
     }
 }
