@@ -39,6 +39,9 @@ class PedidoNotificacaoEventParkingLotIntegrationTest {
     @DisplayName("Deve consumir notificação parking lot")
     @Order(1)
     void deveConsumirNotificacaoParkingLot(){
+        when(notificacaoService.salvarNotificacao(any(NotificacaoDTO.class), any(NotificacaoStatusEnum.class)))
+                .thenReturn(mock(NotificacaoDTO.class));
+
         assertDoesNotThrow(() -> rabbitTemplate.convertAndSend("ms.produto.notificacaoevent.queue.pl", notificacaoDTO));
 
         await().atMost(5, TimeUnit.SECONDS)

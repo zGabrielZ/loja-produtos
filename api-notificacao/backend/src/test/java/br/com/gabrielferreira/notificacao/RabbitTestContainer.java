@@ -11,17 +11,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RabbitTestContainer implements BeforeAllCallback, AfterAllCallback {
 
-    private static AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+    private static final AtomicBoolean atomicBoolean = new AtomicBoolean(false);
 
-    public static RabbitMQContainer rabbitMQContainer = new RabbitMQContainer("rabbitmq:3.13.0-management")
-            .withExposedPorts(5672, 15672);
+    public static RabbitMQContainer rabbitMQContainer = null;
 
     @Autowired
     private RabbitListenerEndpointRegistry rabbitListenerEndpointRegistry;
 
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
-        if(!atomicBoolean.get()){
+        if(!atomicBoolean.get() && rabbitMQContainer == null){
+            rabbitMQContainer = new RabbitMQContainer("rabbitmq:3.13.0-management")
+                    .withExposedPorts(5672, 15672);
             rabbitMQContainer.start();
 
             System.setProperty("spring.rabbitmq.host", rabbitMQContainer.getHost());
@@ -35,15 +36,14 @@ public class RabbitTestContainer implements BeforeAllCallback, AfterAllCallback 
 
     @Override
     public void afterAll(ExtensionContext extensionContext) throws Exception {
-        if(atomicBoolean.get()){
+        if(atomicBoolean.get() && rabbitMQContainer != null){
 
             if(rabbitListenerEndpointRegistry != null){
                 rabbitListenerEndpointRegistry.stop();
             }
 
-            Thread.sleep(1000);
-
             rabbitMQContainer.stop();
+            rabbitMQContainer = null;
             atomicBoolean.set(false);
         }
     }
