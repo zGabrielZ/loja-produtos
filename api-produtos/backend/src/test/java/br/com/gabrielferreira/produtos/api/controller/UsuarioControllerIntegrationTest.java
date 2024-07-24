@@ -1,6 +1,5 @@
 package br.com.gabrielferreira.produtos.api.controller;
 
-import br.com.gabrielferreira.produtos.ContainerTest;
 import br.com.gabrielferreira.produtos.api.dto.create.UsuarioCreateDTO;
 import br.com.gabrielferreira.produtos.api.dto.update.UsuarioSenhaUpdateDTO;
 import br.com.gabrielferreira.produtos.api.dto.update.UsuarioUpdateDTO;
@@ -23,7 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@ContainerTest
 class UsuarioControllerIntegrationTest {
 
     private static final String URL = "/usuarios";

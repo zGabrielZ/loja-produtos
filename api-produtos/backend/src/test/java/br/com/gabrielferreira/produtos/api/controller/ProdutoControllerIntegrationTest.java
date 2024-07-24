@@ -1,6 +1,5 @@
 package br.com.gabrielferreira.produtos.api.controller;
 
-import br.com.gabrielferreira.produtos.ContainerTest;
 import br.com.gabrielferreira.produtos.api.dto.create.ProdutoCreateDTO;
 import br.com.gabrielferreira.produtos.api.dto.update.ProdutoUpdateDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +23,6 @@ import static br.com.gabrielferreira.produtos.tests.ProdutoFactory.*;
 @AutoConfigureMockMvc
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@ContainerTest
 class ProdutoControllerIntegrationTest {
 
     private static final String URL = "/produtos";

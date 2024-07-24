@@ -1,6 +1,6 @@
 package br.com.gabrielferreira.produtos.api.controller;
 
-import br.com.gabrielferreira.produtos.ContainerTest;
+import br.com.gabrielferreira.produtos.AbstractIntegrationTest;
 import br.com.gabrielferreira.produtos.api.dto.create.PedidoCreateDTO;
 import br.com.gabrielferreira.produtos.commons.dto.NotificacaoDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,8 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureMockMvc
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@ContainerTest
-class PedidoControllerIntegrationTest {
+class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
     private static final String URL = "/usuarios";
     private static final MediaType MEDIA_TYPE_JSON = MediaType.APPLICATION_JSON;
