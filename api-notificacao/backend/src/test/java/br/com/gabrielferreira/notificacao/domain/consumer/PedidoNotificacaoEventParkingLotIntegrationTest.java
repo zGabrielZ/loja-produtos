@@ -1,6 +1,6 @@
 package br.com.gabrielferreira.notificacao.domain.consumer;
 
-import br.com.gabrielferreira.notificacao.ContainerTest;
+import br.com.gabrielferreira.notificacao.AbstractIntegrationTest;
 import br.com.gabrielferreira.notificacao.domain.model.enums.NotificacaoStatusEnum;
 import br.com.gabrielferreira.notificacao.domain.service.NotificacaoService;
 import br.com.gabrielferreira.produtos.commons.dto.NotificacaoDTO;
@@ -18,9 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.awaitility.Awaitility.*;
 
 @SpringBootTest
-@ContainerTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class PedidoNotificacaoEventParkingLotIntegrationTest {
+class PedidoNotificacaoEventParkingLotIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     protected RabbitTemplate rabbitTemplate;

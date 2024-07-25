@@ -1,4 +1,4 @@
-package br.com.gabrielferreira.produtos;
+package br.com.gabrielferreira.notificacao;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,7 +9,7 @@ import org.testcontainers.containers.RabbitMQContainer;
 public abstract class AbstractIntegrationTest {
 
     static RabbitMQContainer RABBIT_MQ_CONTAINER = new RabbitMQContainer("rabbitmq:3.13.0-management")
-            .withExposedPorts(5672, 15672);
+                .withExposedPorts(5672, 15672);
 
     @BeforeAll
     static void setUpAll(){

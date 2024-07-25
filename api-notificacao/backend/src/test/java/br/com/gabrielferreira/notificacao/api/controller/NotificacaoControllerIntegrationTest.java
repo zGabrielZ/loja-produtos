@@ -1,6 +1,5 @@
 package br.com.gabrielferreira.notificacao.api.controller;
 
-import br.com.gabrielferreira.notificacao.ContainerTest;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,7 +17,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@ContainerTest
 class NotificacaoControllerIntegrationTest {
 
     private static final String URL = "/notificacoes";
