@@ -34,4 +34,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
             "JOIN u.pedidos p " +
             "WHERE u.id = :id AND p.id = :idPedido")
     boolean existsUsuarioComPedidoPorId(@Param("id") Long id, @Param("idPedido") Long idPedido);
+
+    @Query("SELECT u FROM Usuario u " +
+            "JOIN FETCH u.perfis p " +
+            "WHERE u.email = :email")
+    Optional<Usuario> buscarUsuarioComPerfisPorEmail(@Param("email") String email);
 }

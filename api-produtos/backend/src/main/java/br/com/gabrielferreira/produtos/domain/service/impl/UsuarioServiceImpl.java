@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,8 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private final PerfilService perfilService;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Transactional
     @Override
     public Usuario salvarUsuario(Usuario usuario) {
@@ -36,6 +39,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         validarEmail(usuario.getEmail(), null);
         validarPerfis(usuario.getPerfis());
 
+        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         usuario = usuarioRepository.save(usuario);
         return usuario;
     }
@@ -65,8 +69,8 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         validarSenhaUsuario(novaSenha);
         validarSenhaAntiga(antigaSenha, usuarioEncontrado.getSenha(), novaSenha);
-        usuarioEncontrado.setSenha(novaSenha);
 
+        usuarioEncontrado.setSenha(passwordEncoder.encode(novaSenha));
         usuarioEncontrado = usuarioRepository.save(usuarioEncontrado);
         return usuarioEncontrado;
     }

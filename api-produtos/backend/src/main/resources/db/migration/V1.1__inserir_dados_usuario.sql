@@ -1,0 +1,2 @@
+insert into tb_usuario (nome, email, senha, data_inclusao) values ('Usuário #1', 'usuario@email.com', '$2a$10$SoSxk7Qr5tk1dOHou6LIZ.QX4M/aaKX9ct3Ouvf7Eh56tyi1NRvYG', NOW());
+insert into tb_usuario_perfil (id_usuario, id_perfil) values (2, 1);
