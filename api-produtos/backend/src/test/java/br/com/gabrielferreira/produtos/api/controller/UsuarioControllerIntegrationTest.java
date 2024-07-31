@@ -3,6 +3,7 @@ package br.com.gabrielferreira.produtos.api.controller;
 import br.com.gabrielferreira.produtos.api.dto.create.UsuarioCreateDTO;
 import br.com.gabrielferreira.produtos.api.dto.update.UsuarioSenhaUpdateDTO;
 import br.com.gabrielferreira.produtos.api.dto.update.UsuarioUpdateDTO;
+import br.com.gabrielferreira.produtos.utils.TokenUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,8 @@ class UsuarioControllerIntegrationTest {
     private static final String SENHA_SEM_CARACTERE_MAIUSCULA = "@teste";
     private static final String SENHA_SEM_CARACTERE_MINUSCULA = "@TESTE";
     private static final String SENHA_SEM_CARACTERE_DIGITO = "@TESTe";
+    private static final String AUTHORIZATION = "Authorization";
+    private static final String BEARER = "Bearer ";
 
     @Autowired
     protected MockMvc mockMvc;
@@ -37,9 +40,14 @@ class UsuarioControllerIntegrationTest {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    @Autowired
+    protected TokenUtils tokenUtils;
+
     private UsuarioCreateDTO usuarioCreateDTO;
 
-    private Long idUsuarioExistente;
+    private Long idUsuarioAdminExistente;
+
+    private Long idUsuarioFuncionarioExistente;
 
     private Long idUsuarioInexistente;
 
@@ -47,13 +55,25 @@ class UsuarioControllerIntegrationTest {
 
     private UsuarioSenhaUpdateDTO usuarioSenhaUpdateDTO;
 
+    private String tokenAdmin;
+
+    private String tokenFuncionario;
+
+    private String tokenCliente;
+
+    // TODO: FAZER MAIS TESTES POIS FOI INCLUIDO MAIS REGRAS DE NEGOCIOS
+
     @BeforeEach
     void setUp(){
         usuarioCreateDTO = criarUsuario();
-        idUsuarioExistente = 1L;
+        idUsuarioAdminExistente = 1L;
+        idUsuarioFuncionarioExistente = 2L;
         idUsuarioInexistente = -1L;
         usuarioUpdateDTO = atualizarUsuario();
         usuarioSenhaUpdateDTO = atualizarSenhaUsuario();
+        tokenAdmin = tokenUtils.gerarToken(mockMvc, "teste111@email.com.br", "@Aa123");
+        tokenFuncionario = tokenUtils.gerarToken(mockMvc, "teste222@email.com.br", "@Aa123");
+        tokenCliente = tokenUtils.gerarToken(mockMvc, "teste333@email.com.br", "@Aa123");
     }
 
     @Test
@@ -67,6 +87,7 @@ class UsuarioControllerIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(post(URL)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
@@ -155,18 +176,19 @@ class UsuarioControllerIntegrationTest {
     @DisplayName("Não deve cadastrar usuário quando informar email já existente")
     @Order(6)
     void naoDeveCadastrarUsuarioQuandoTiverEmailExistente() throws Exception{
-        usuarioCreateDTO.setEmail("teste123@email.com.br");
+        usuarioCreateDTO.setEmail("teste222@email.com.br");
         String jsonBody = objectMapper.writeValueAsString(usuarioCreateDTO);
 
         ResultActions resultActions = mockMvc
                 .perform(post(URL)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isBadRequest());
         resultActions.andExpect(jsonPath("$.titulo").value("Regra de negócio"));
-        resultActions.andExpect(jsonPath("$.mensagem").value("Não vai ser possível cadastrar este usuário pois o e-mail 'teste123@email.com.br' já foi cadastrado"));
+        resultActions.andExpect(jsonPath("$.mensagem").value("Não vai ser possível cadastrar este usuário pois o e-mail 'teste222@email.com.br' já foi cadastrado"));
     }
 
     @Test
@@ -179,6 +201,7 @@ class UsuarioControllerIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(post(URL)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
@@ -199,6 +222,7 @@ class UsuarioControllerIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(post(URL)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
@@ -213,7 +237,8 @@ class UsuarioControllerIntegrationTest {
     @Order(9)
     void deveBuscarUsuarioPorId() throws Exception {
         ResultActions resultActions = mockMvc
-                .perform(get(URL.concat("/{id}"), idUsuarioExistente)
+                .perform(get(URL.concat("/{id}"), idUsuarioAdminExistente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isOk());
@@ -229,6 +254,7 @@ class UsuarioControllerIntegrationTest {
     void naoDeveBuscarUsuarioPorId() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(get(URL.concat("/{id}"), idUsuarioInexistente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isNotFound());
@@ -241,11 +267,12 @@ class UsuarioControllerIntegrationTest {
     void deveAtualizarUsuarioQuandoInformarDados() throws Exception{
         String jsonBody = objectMapper.writeValueAsString(usuarioUpdateDTO);
 
-        Long idEsperado = idUsuarioExistente;
+        Long idEsperado = idUsuarioAdminExistente;
         String nomeEsperado = usuarioUpdateDTO.getNome();
 
         ResultActions resultActions = mockMvc
-                .perform(put(URL.concat("/{id}"), idUsuarioExistente)
+                .perform(put(URL.concat("/{id}"), idUsuarioAdminExistente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
@@ -261,10 +288,11 @@ class UsuarioControllerIntegrationTest {
     void deveAtualizarSenhaUsuarioQuandoInformarDados() throws Exception{
         String jsonBody = objectMapper.writeValueAsString(usuarioSenhaUpdateDTO);
 
-        Long idEsperado = idUsuarioExistente;
+        Long idEsperado = idUsuarioAdminExistente;
 
         ResultActions resultActions = mockMvc
-                .perform(put(URL.concat("/{id}").concat("/senha"), idUsuarioExistente)
+                .perform(put(URL.concat("/{id}").concat("/senha"), idUsuarioAdminExistente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
@@ -281,7 +309,8 @@ class UsuarioControllerIntegrationTest {
         String jsonBody = objectMapper.writeValueAsString(usuarioSenhaUpdateDTO);
 
         ResultActions resultActions = mockMvc
-                .perform(put(URL.concat("/{id}").concat("/senha"), idUsuarioExistente)
+                .perform(put(URL.concat("/{id}").concat("/senha"), idUsuarioAdminExistente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
@@ -299,7 +328,8 @@ class UsuarioControllerIntegrationTest {
         String jsonBody = objectMapper.writeValueAsString(usuarioSenhaUpdateDTO);
 
         ResultActions resultActions = mockMvc
-                .perform(put(URL.concat("/{id}").concat("/senha"), idUsuarioExistente)
+                .perform(put(URL.concat("/{id}").concat("/senha"), idUsuarioAdminExistente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
@@ -314,7 +344,8 @@ class UsuarioControllerIntegrationTest {
     @Order(15)
     void deveDeletarUsuarioQuandoExistirDados() throws Exception {
         ResultActions resultActions = mockMvc
-                .perform(delete(URL.concat("/{id}"), idUsuarioExistente)
+                .perform(delete(URL.concat("/{id}"), idUsuarioFuncionarioExistente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isNoContent());
@@ -326,6 +357,7 @@ class UsuarioControllerIntegrationTest {
     void naoDeveDeletarUsuario() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(delete(URL.concat("/{id}"), idUsuarioInexistente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isNotFound());
@@ -340,6 +372,7 @@ class UsuarioControllerIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(get(filtro)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isOk());
