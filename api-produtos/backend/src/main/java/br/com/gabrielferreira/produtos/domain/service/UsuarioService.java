@@ -25,4 +25,6 @@ public interface UsuarioService {
     boolean existeUsuarioComPedido(Long id, Long idPedido);
 
     boolean naoExisteUsuarioComPedido(Long id, Long idPedido);
+
+    void validarUsuarioAutenticado(Long idUsuario);
 }

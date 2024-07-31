@@ -1,8 +1,9 @@
 package br.com.gabrielferreira.produtos.api.dto.create;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.io.Serial;
@@ -37,8 +38,5 @@ public class UsuarioCreateDTO implements Serializable {
     private String senha;
 
     @Schema(description = "Perfis do usuário")
-    @Valid
-    @NotNull
-    @NotEmpty
     private List<PerfilCreateDTO> perfis = new ArrayList<>();
 }

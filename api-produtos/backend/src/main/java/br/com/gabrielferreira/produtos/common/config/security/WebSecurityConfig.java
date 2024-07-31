@@ -30,6 +30,10 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
+    private static final String[] API_POST_PUBLIC = new String[]{
+            "/auth", "/usuarios"
+    };
+
     private final UserDetailsAutenticacaoService userDetailsAutenticacaoService;
 
     private final TokenService tokenService;
@@ -66,7 +70,7 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // Desabilitar o csrf
                 .addFilterBefore(new JWTValidatorTokenFilter(tokenService, userDetailsAutenticacaoService), UsernamePasswordAuthenticationFilter.class) // Verificar se o token está valido cada requisição
                 .authenticationProvider(new AppAuthenticationProvider(userDetailsAutenticacaoService, passwordEncoder()))
-                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.POST, "/auth").permitAll()
+                .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.POST, API_POST_PUBLIC).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(eh -> eh.authenticationEntryPoint(new ApiExceptionHandlerUnauthorized(objectMapper, erroPadraoMapper)) // Mensagem personalizada quando não for autenticado
                         .accessDeniedHandler(new ApiExceptionHandlerForbidden(objectMapper, erroPadraoMapper))) // Mensagem personalizada quando não tiver permissão
@@ -77,7 +81,7 @@ public class WebSecurityConfig {
     @Bean
     public RoleHierarchy roleHierarchy(){
         RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
-        String hierarchy = "ROLE_ADMIM > ROLE_FUNCIONARIO \n ROLE_FUNCIONARIO > ROLE_CLIENTE";
+        String hierarchy = "ROLE_ADMIN > ROLE_FUNCIONARIO \n ROLE_FUNCIONARIO > ROLE_CLIENTE";
         roleHierarchy.setHierarchy(hierarchy);
         return roleHierarchy;
     }

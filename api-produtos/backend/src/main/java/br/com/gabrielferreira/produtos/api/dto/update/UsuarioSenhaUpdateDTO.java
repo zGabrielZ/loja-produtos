@@ -26,7 +26,6 @@ public class UsuarioSenhaUpdateDTO implements Serializable {
     private String novaSenha;
 
     @Schema(description = "Antiga senha do usuário", example = "123")
-    @NotBlank
     @Size(min = 1, max = 255)
     private String antigaSenha;
 }

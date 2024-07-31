@@ -22,8 +22,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import java.net.URI;
 
 @Tag(name = "Usuário Controller", description = "Endpoints para realizar requisições de usuário")
@@ -72,6 +74,7 @@ public class UsuarioController {
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioResumidoDTO> buscarUsuarioPorId(@PathVariable Long id){
         log.debug("GET buscarUsuarioPorId idUsuario : {}", id);
+        usuarioService.validarUsuarioAutenticado(id);
         Usuario usuario = usuarioService.buscarUsuarioPorId(id);
         UsuarioResumidoDTO usuarioResumidoDTO = usuarioMapper.toUsuarioResumidoDto(usuario);
 
@@ -93,6 +96,7 @@ public class UsuarioController {
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioDTO> atualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioUpdateDTO usuarioUpdateDTO){
         log.debug("PUT atualizarUsuario idUsuario : {}, usuario : {}", id, usuarioUpdateDTO);
+        usuarioService.validarUsuarioAutenticado(id);
         Usuario usuario = usuarioMapper.toUsuario(usuarioUpdateDTO);
         Usuario usuarioAtualizado = usuarioService.atualizarUsuario(id, usuario);
         UsuarioDTO usuarioDTO = usuarioMapper.toUsuarioDto(usuarioAtualizado);
@@ -115,6 +119,7 @@ public class UsuarioController {
     @PutMapping("/{id}/senha")
     public ResponseEntity<UsuarioDTO> atualizarSenhaUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioSenhaUpdateDTO usuarioSenhaUpdateDTO){
         log.debug("PUT atualizarSenhaUsuario idUsuario : {}", id);
+        usuarioService.validarUsuarioAutenticado(id);
         Usuario usuarioAtualizado = usuarioService.atualizarSenhaUsuario(id, usuarioSenhaUpdateDTO.getNovaSenha(), usuarioSenhaUpdateDTO.getAntigaSenha());
         UsuarioDTO usuarioDTO = usuarioMapper.toUsuarioDto(usuarioAtualizado);
 
@@ -123,6 +128,7 @@ public class UsuarioController {
         return ResponseEntity.ok().body(usuarioDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Deletar usuário por id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Usuário deletado",
@@ -140,6 +146,7 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @Operation(summary = "Buscar usuários")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuários encontrados",

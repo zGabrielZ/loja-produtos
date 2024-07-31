@@ -1,13 +1,17 @@
 package br.com.gabrielferreira.produtos.domain.service.impl;
 
+import br.com.gabrielferreira.produtos.common.config.security.UserDetailsImpl;
+import br.com.gabrielferreira.produtos.domain.exception.ForbiddenException;
 import br.com.gabrielferreira.produtos.domain.exception.NaoEncontradoException;
 import br.com.gabrielferreira.produtos.domain.exception.RegraDeNegocioException;
 import br.com.gabrielferreira.produtos.domain.model.Perfil;
 import br.com.gabrielferreira.produtos.domain.model.Usuario;
 import br.com.gabrielferreira.produtos.domain.repository.UsuarioRepository;
 import br.com.gabrielferreira.produtos.domain.service.PerfilService;
+import br.com.gabrielferreira.produtos.domain.service.UserDetailsAutenticacaoService;
 import br.com.gabrielferreira.produtos.domain.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -15,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,12 +36,18 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final UserDetailsAutenticacaoService userDetailsAutenticacaoService;
+
     @Transactional
     @Override
     public Usuario salvarUsuario(Usuario usuario) {
         validarCamposUsuario(usuario);
         validarSenhaUsuario(usuario.getSenha());
         validarEmail(usuario.getEmail(), null);
+
+        UserDetailsImpl userDetailsAutenticado = userDetailsAutenticacaoService.buscarUsuarioAutenticado();
+        validarCriacaoPerfisUsuarioAutenticado(usuario, userDetailsAutenticado);
+        validarCriacaoPerfisUsuarioNaoAutenticado(usuario, userDetailsAutenticado);
         validarPerfis(usuario.getPerfis());
 
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
@@ -54,9 +65,16 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public Usuario atualizarUsuario(Long id, Usuario usuario) {
         Usuario usuarioEncontrado = buscarUsuarioPorId(id);
-        validarPerfis(usuario.getPerfis());
+
+        UserDetailsImpl userDetailsAutenticado = userDetailsAutenticacaoService.buscarUsuarioAutenticado();
+        validarAtualizacaoPerfisUsuarioAutenticado(usuario, userDetailsAutenticado);
 
         preencherCamposUsuario(usuarioEncontrado, usuario);
+
+        if(userDetailsAutenticado.isAdmin()){
+            validarPerfis(usuario.getPerfis());
+            preencherCamposUsuarioPerfis(usuarioEncontrado, usuario);
+        }
 
         usuarioEncontrado = usuarioRepository.save(usuarioEncontrado);
         return usuarioEncontrado;
@@ -68,7 +86,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario usuarioEncontrado = buscarUsuarioPorId(id);
 
         validarSenhaUsuario(novaSenha);
-        validarSenhaAntiga(antigaSenha, usuarioEncontrado.getSenha(), novaSenha);
+        validarSenhaAntiga(antigaSenha, usuarioEncontrado.getSenha(), novaSenha, id);
 
         usuarioEncontrado.setSenha(passwordEncoder.encode(novaSenha));
         usuarioEncontrado = usuarioRepository.save(usuarioEncontrado);
@@ -78,6 +96,11 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     @Override
     public void deletarUsuarioPorId(Long id) {
+        UserDetailsImpl userDetailsAutenticado = userDetailsAutenticacaoService.buscarUsuarioAutenticado();
+        if(userDetailsAutenticado.getId().equals(id)){
+            throw new ForbiddenException("Você não pode excluir a sua própria conta no sistema");
+        }
+
         Usuario usuarioEncontrado = buscarUsuarioPorId(id);
         usuarioRepository.delete(usuarioEncontrado);
     }
@@ -112,13 +135,28 @@ public class UsuarioServiceImpl implements UsuarioService {
         return !existeUsuarioComPedido(id, idPedido);
     }
 
-    private void validarSenhaAntiga(String antigaSenha, String senhaCadastrada, String novaSenha){
-        if(!antigaSenha.equals(senhaCadastrada)){
-            throw new RegraDeNegocioException("Senha antiga informada é incompatível");
+    @Override
+    public void validarUsuarioAutenticado(Long idUsuario) {
+        UserDetailsImpl userDetailsAutenticado = userDetailsAutenticacaoService.buscarUsuarioAutenticado();
+        if(!userDetailsAutenticado.isAdmin() && !idUsuario.equals(userDetailsAutenticado.getId())){
+            throw new ForbiddenException("Você não tem permissão para realizar a requisição");
         }
+    }
 
-        if(novaSenha.equals(senhaCadastrada)){
-            throw new RegraDeNegocioException("Nova senha é igual ao anterior");
+    private void validarSenhaAntiga(String antigaSenha, String senhaCadastrada, String novaSenha, Long idUsuario){
+        UserDetailsImpl userDetailsAutenticado = userDetailsAutenticacaoService.buscarUsuarioAutenticado();
+        if(idUsuario.equals(userDetailsAutenticado.getId())){
+            if(StringUtils.isBlank(antigaSenha)){
+                throw new RegraDeNegocioException("É necessário informar a senha antiga");
+            }
+
+            if(!passwordEncoder.matches(antigaSenha, senhaCadastrada)){
+                throw new RegraDeNegocioException("Senha antiga informada é incompatível");
+            }
+
+            if(passwordEncoder.matches(novaSenha, senhaCadastrada)){
+                throw new RegraDeNegocioException("Nova senha é igual ao anterior");
+            }
         }
     }
 
@@ -188,7 +226,9 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     private void preencherCamposUsuario(Usuario usuarioExistente, Usuario usuario){
         usuarioExistente.setNome(usuario.getNome().trim());
+    }
 
+    private void preencherCamposUsuarioPerfis(Usuario usuarioExistente, Usuario usuario){
         removerPerfisNaoExistentes(usuarioExistente.getPerfis(), usuario.getPerfis());
         incluirNovosPerfis(usuarioExistente.getPerfis(), usuario.getPerfis());
     }
@@ -203,5 +243,31 @@ public class UsuarioServiceImpl implements UsuarioService {
                 perfisExistentes.add(novoPerfil);
             }
         });
+    }
+
+    private void validarCriacaoPerfisUsuarioAutenticado(Usuario usuario, UserDetailsImpl userDetailsAutenticado){
+        if(userDetailsAutenticado != null && userDetailsAutenticado.isAdmin() && usuario.getPerfis().isEmpty()){
+            throw new RegraDeNegocioException("Não vai ser possível cadastrar este usuário pois o usuário autenticado não informou o perfil");
+        } else if(userDetailsAutenticado != null && (userDetailsAutenticado.isFuncionario() || userDetailsAutenticado.isCliente())){
+            throw new RegraDeNegocioException("Não vai ser possível cadastrar este usuário pois o usuário autenticado não é admin");
+        }
+    }
+
+    private void validarCriacaoPerfisUsuarioNaoAutenticado(Usuario usuario, UserDetailsImpl userDetailsAutenticado){
+        if(userDetailsAutenticado == null && !usuario.getPerfis().isEmpty()){
+            throw new RegraDeNegocioException("Não vai ser possível cadastrar este usuário pois você não tem permissão para incluir perfil para este usuário");
+        } else if(userDetailsAutenticado == null && usuario.getPerfis().isEmpty()){
+            List<Perfil> perfis = new ArrayList<>();
+            perfis.add(Perfil.builder().id(3L).build());
+            usuario.setPerfis(perfis);
+        }
+    }
+
+    private void validarAtualizacaoPerfisUsuarioAutenticado(Usuario usuario, UserDetailsImpl userDetailsAutenticado){
+        if(userDetailsAutenticado.isAdmin() && usuario.getPerfis().isEmpty()){
+            throw new RegraDeNegocioException("Não vai ser possível atualizar este usuário pois o usuário autenticado não informou o perfil");
+        } else if(!userDetailsAutenticado.isAdmin() && !usuario.getPerfis().isEmpty()){
+            throw new RegraDeNegocioException("Não vai ser possível atualizar este usuário pois o usuário autenticado não tem permissão de incluir ou alterar perfil");
+        }
     }
 }

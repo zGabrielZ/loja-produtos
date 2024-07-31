@@ -32,6 +32,12 @@ public class UserDetailsImpl implements Serializable, UserDetails {
 
     private List<PerfilDetailsImpl> perfis = new ArrayList<>();
 
+    private boolean isAdmin;
+
+    private boolean isFuncionario;
+
+    private boolean isCliente;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.perfis;
