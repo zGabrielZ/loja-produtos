@@ -1,5 +1,6 @@
 package br.com.gabrielferreira.produtos.api.controller;
 
+import br.com.gabrielferreira.produtos.utils.TokenUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -22,34 +23,43 @@ class UsuarioPerfilControllerIntegrationTest {
 
     private static final String URL = "/usuarios";
     private static final MediaType MEDIA_TYPE_JSON = MediaType.APPLICATION_JSON;
+    private static final String AUTHORIZATION = "Authorization";
+    private static final String BEARER = "Bearer ";
 
     @Autowired
     protected MockMvc mockMvc;
+
+    @Autowired
+    protected TokenUtils tokenUtils;
 
     private Long idPerfilExistente;
 
     private Long idPerfilInexsitente;
 
-    private Long idUsuarioExistente;
+    private Long idUsuarioAdminExistente;
 
     private Long idUsuarioInexsitente;
+
+    private String tokenAdmin;
 
     @BeforeEach
     void setUp(){
         idPerfilExistente = 1L;
-        idUsuarioExistente = 1L;
+        idUsuarioAdminExistente = 1L;
         idPerfilInexsitente = -1L;
         idUsuarioInexsitente = -1L;
+        tokenAdmin = tokenUtils.gerarToken(mockMvc, "teste111@email.com.br", "@Aa123");
     }
 
     @Test
     @DisplayName("Deve buscar perfis de usuário por id quando existir dado informado")
     @Order(1)
     void deveBuscarPerfilDeUsuarioPorId() throws Exception {
-        String url = URL.concat("/").concat(idUsuarioExistente.toString()).concat("/perfis/").concat(idPerfilExistente.toString());
+        String url = URL.concat("/").concat(idUsuarioAdminExistente.toString()).concat("/perfis/").concat(idPerfilExistente.toString());
 
         ResultActions resultActions = mockMvc
                 .perform(get(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isOk());
@@ -66,6 +76,7 @@ class UsuarioPerfilControllerIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(get(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isNotFound());
@@ -76,10 +87,11 @@ class UsuarioPerfilControllerIntegrationTest {
     @DisplayName("Deve buscar perfis de usuários")
     @Order(3)
     void deveBuscarPerfisDeUsuarios() throws Exception {
-        String url = URL.concat("/").concat(idUsuarioExistente.toString()).concat("/perfis");
+        String url = URL.concat("/").concat(idUsuarioAdminExistente.toString()).concat("/perfis");
 
         ResultActions resultActions = mockMvc
                 .perform(get(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isOk());
@@ -92,10 +104,11 @@ class UsuarioPerfilControllerIntegrationTest {
     @DisplayName("Não deve buscar perfis de usuário por id quando não existir dado informado")
     @Order(4)
     void naoDeveBuscarPerfilDeUsuarioPorIdPerfil() throws Exception {
-        String url = URL.concat("/").concat(idUsuarioExistente.toString()).concat("/perfis/").concat(idPerfilInexsitente.toString());
+        String url = URL.concat("/").concat(idUsuarioAdminExistente.toString()).concat("/perfis/").concat(idPerfilInexsitente.toString());
 
         ResultActions resultActions = mockMvc
                 .perform(get(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isNotFound());

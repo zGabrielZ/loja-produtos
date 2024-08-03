@@ -4,6 +4,7 @@ import br.com.gabrielferreira.produtos.api.dto.PerfilDTO;
 import br.com.gabrielferreira.produtos.api.mapper.PerfilMapper;
 import br.com.gabrielferreira.produtos.domain.model.Perfil;
 import br.com.gabrielferreira.produtos.domain.service.UsuarioPerfilService;
+import br.com.gabrielferreira.produtos.domain.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,6 +32,8 @@ public class UsuarioPerfilController {
 
     private final PerfilMapper perfilMapper;
 
+    private final UsuarioService usuarioService;
+
     @Operation(summary = "Buscar perfil por id usuário e id perfil")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Perfil encontrado",
@@ -42,6 +45,7 @@ public class UsuarioPerfilController {
     @GetMapping("/{id}")
     public ResponseEntity<PerfilDTO> buscarPerfilPorId(@PathVariable Long idUsuario,@PathVariable Long id){
         log.debug("GET buscarPerfilPorId idUsuario : {}, idPerfil : {}", idUsuario, id);
+        usuarioService.validarUsuarioAutenticado(idUsuario);
         Perfil perfil = usuarioPerfilService.buscarPerfilPorId(idUsuario, id);
         PerfilDTO perfilDTO = perfilMapper.toPerfilDto(perfil);
 
@@ -61,6 +65,7 @@ public class UsuarioPerfilController {
     @GetMapping
     public ResponseEntity<List<PerfilDTO>> buscarPerfis(@PathVariable Long idUsuario){
         log.debug("GET buscarPerfis idUsuario : {}", idUsuario);
+        usuarioService.validarUsuarioAutenticado(idUsuario);
         List<Perfil> perfis = usuarioPerfilService.buscarPerfisPorIdUsuario(idUsuario);
         List<PerfilDTO> perfilDTO = perfilMapper.toPerfisDtos(perfis);
 
