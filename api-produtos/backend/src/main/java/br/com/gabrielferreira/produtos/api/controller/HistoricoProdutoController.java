@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Historico Produto Controller", description = "Endpoints para busca de históricos de produtos")
@@ -30,6 +31,7 @@ public class HistoricoProdutoController {
 
     private final HistoricoProdutoMapper historicoProdutoMapper;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
     @Operation(summary = "Buscar históricos produtos por id produto")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Históricos produtos encontrados",
@@ -48,6 +50,7 @@ public class HistoricoProdutoController {
         return ResponseEntity.ok().body(historicoProdutoDTOS);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
     @Operation(summary = "Buscar histórico produto por id produto e id histórico")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Histórico produto encontrado",
