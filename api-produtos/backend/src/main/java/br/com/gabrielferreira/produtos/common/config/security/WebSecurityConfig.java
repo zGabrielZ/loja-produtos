@@ -34,6 +34,10 @@ public class WebSecurityConfig {
             "/auth", "/usuarios"
     };
 
+    private static final String[] API_GET_PUBLIC = new String[]{
+            "/perfis/**"
+    };
+
     private final UserDetailsAutenticacaoService userDetailsAutenticacaoService;
 
     private final TokenService tokenService;
@@ -71,6 +75,7 @@ public class WebSecurityConfig {
                 .addFilterBefore(new JWTValidatorTokenFilter(tokenService, userDetailsAutenticacaoService), UsernamePasswordAuthenticationFilter.class) // Verificar se o token está valido cada requisição
                 .authenticationProvider(new AppAuthenticationProvider(userDetailsAutenticacaoService, passwordEncoder()))
                 .authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.POST, API_POST_PUBLIC).permitAll()
+                        .requestMatchers(HttpMethod.GET, API_GET_PUBLIC).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(eh -> eh.authenticationEntryPoint(new ApiExceptionHandlerUnauthorized(objectMapper, erroPadraoMapper)) // Mensagem personalizada quando não for autenticado
                         .accessDeniedHandler(new ApiExceptionHandlerForbidden(objectMapper, erroPadraoMapper))) // Mensagem personalizada quando não tiver permissão
