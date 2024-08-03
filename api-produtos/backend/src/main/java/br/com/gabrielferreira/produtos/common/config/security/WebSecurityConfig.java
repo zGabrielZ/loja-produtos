@@ -35,7 +35,7 @@ public class WebSecurityConfig {
     };
 
     private static final String[] API_GET_PUBLIC = new String[]{
-            "/perfis/**"
+            "/perfis/**", "/produtos/**"
     };
 
     private final UserDetailsAutenticacaoService userDetailsAutenticacaoService;

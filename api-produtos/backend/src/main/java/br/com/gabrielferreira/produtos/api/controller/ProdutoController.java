@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -37,6 +38,7 @@ public class ProdutoController {
 
     private final ProdutoMapper produtoMapper;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
     @Operation(summary = "Cadastrar produto")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Produto cadastrado",
@@ -78,6 +80,7 @@ public class ProdutoController {
         return ResponseEntity.ok().body(produtoDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
     @Operation(summary = "Atualizar produto")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Produto atualizado",
@@ -100,6 +103,7 @@ public class ProdutoController {
         return ResponseEntity.ok().body(produtoDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FUNCIONARIO')")
     @Operation(summary = "Deletar produto por id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Produto deletado",

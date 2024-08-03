@@ -13,6 +13,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -64,6 +65,10 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErroPadrao> erroException(Exception e, HttpServletRequest request){
+        if(e instanceof AccessDeniedException){
+            return forbiddenException(new ForbiddenException("Você não tem permissão para realizar a requisição"), request);
+        }
+
         log.error("erroException message : {}, requestUrl : {}", e.getMessage(), request.getRequestURI());
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         ErroPadrao erroPadrao = erroPadraoMapper.toErroPadrao(toFusoPadraoSistema(ZonedDateTime.now()), httpStatus.value(), "Erro inesperado", "Ocorreu um erro inesperado no sistema, tente mais tarde", request.getRequestURI());

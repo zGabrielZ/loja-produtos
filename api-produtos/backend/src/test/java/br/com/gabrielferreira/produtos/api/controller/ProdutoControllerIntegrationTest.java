@@ -2,6 +2,7 @@ package br.com.gabrielferreira.produtos.api.controller;
 
 import br.com.gabrielferreira.produtos.api.dto.create.ProdutoCreateDTO;
 import br.com.gabrielferreira.produtos.api.dto.update.ProdutoUpdateDTO;
+import br.com.gabrielferreira.produtos.utils.TokenUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +28,17 @@ class ProdutoControllerIntegrationTest {
 
     private static final String URL = "/produtos";
     private static final MediaType MEDIA_TYPE_JSON = MediaType.APPLICATION_JSON;
+    private static final String AUTHORIZATION = "Authorization";
+    private static final String BEARER = "Bearer ";
 
     @Autowired
     protected MockMvc mockMvc;
 
     @Autowired
     protected ObjectMapper objectMapper;
+
+    @Autowired
+    protected TokenUtils tokenUtils;
 
     private ProdutoCreateDTO produtoCreateDTO;
 
@@ -44,6 +50,8 @@ class ProdutoControllerIntegrationTest {
 
     private ProdutoUpdateDTO produtoUpdateDTO;
 
+    private String tokenAdmin;
+
     @BeforeEach
     void setUp(){
         produtoCreateDTO = criarProduto();
@@ -51,6 +59,7 @@ class ProdutoControllerIntegrationTest {
         idProdutoInexsitente = -1L;
         produtoUpdateDTO = atualizarProduto();
         idProdutoIndependenteExistente = 3L;
+        tokenAdmin = tokenUtils.gerarToken(mockMvc, "teste111@email.com.br", "@Aa123");
     }
 
     @Test
@@ -64,6 +73,7 @@ class ProdutoControllerIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(post(URL)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
@@ -86,6 +96,7 @@ class ProdutoControllerIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(post(URL)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
@@ -106,6 +117,7 @@ class ProdutoControllerIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(post(URL)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
@@ -154,6 +166,7 @@ class ProdutoControllerIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(put(URL.concat("/{id}"), idProdutoExistente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
@@ -174,6 +187,7 @@ class ProdutoControllerIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(put(URL.concat("/{id}"), idProdutoExistente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
@@ -188,6 +202,7 @@ class ProdutoControllerIntegrationTest {
     void deveDeletarProdutoQuandoExistirDados() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(delete(URL.concat("/{id}"), idProdutoIndependenteExistente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isNoContent());
@@ -199,6 +214,7 @@ class ProdutoControllerIntegrationTest {
     void naoDeveDeletarProduto() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(delete(URL.concat("/{id}"), idProdutoInexsitente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isNotFound());
@@ -226,6 +242,7 @@ class ProdutoControllerIntegrationTest {
     void naoDeveDeletarProdutoQuandoExistirRelacionamentoComPedido() throws Exception {
         ResultActions resultActions = mockMvc
                 .perform(delete(URL.concat("/{id}"), idProdutoExistente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isBadRequest());
