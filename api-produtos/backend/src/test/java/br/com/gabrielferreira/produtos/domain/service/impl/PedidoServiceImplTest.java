@@ -1,5 +1,6 @@
 package br.com.gabrielferreira.produtos.domain.service.impl;
 
+import br.com.gabrielferreira.produtos.common.config.security.UserDetailsImpl;
 import br.com.gabrielferreira.produtos.domain.model.Pedido;
 import br.com.gabrielferreira.produtos.domain.model.Produto;
 import br.com.gabrielferreira.produtos.domain.model.Usuario;
@@ -7,6 +8,7 @@ import br.com.gabrielferreira.produtos.domain.model.enums.PedidoStatusEnum;
 import br.com.gabrielferreira.produtos.domain.publisher.PedidoNotificacaoEventPublisher;
 import br.com.gabrielferreira.produtos.domain.repository.PedidoRepository;
 import br.com.gabrielferreira.produtos.domain.service.ProdutoService;
+import br.com.gabrielferreira.produtos.domain.service.UserDetailsAutenticacaoService;
 import br.com.gabrielferreira.produtos.domain.service.UsuarioService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +46,9 @@ class PedidoServiceImplTest {
     @InjectMocks
     private PedidoServiceImpl pedidoService;
 
+    @Mock
+    private UserDetailsAutenticacaoService userDetailsAutenticacaoService;
+
     private Long idUsuario;
 
     private Pedido pedido;
@@ -56,10 +61,14 @@ class PedidoServiceImplTest {
     @Captor
     private ArgumentCaptor<Pedido> argumentCaptorPedidoCancelado;
 
+    private UserDetailsImpl userDetails;
+
     @BeforeEach
     void setUp(){
         idUsuario = 1L;
         Usuario usuario = criarUsuarioModel(idUsuario);
+        userDetails = new UserDetailsImpl();
+        userDetails.setId(1L);
 
         Long idProdutoLaranja = 1L;
         Produto produtoLaranja = criarProdutoLaranja(idProdutoLaranja);
@@ -84,6 +93,7 @@ class PedidoServiceImplTest {
     @DisplayName("Deve salvar pedido quando informar campos")
     @Order(1)
     void deveSalvarPedido(){
+        when(userDetailsAutenticacaoService.buscarUsuarioAutenticado()).thenReturn(userDetails);
         Pedido pedidoResultado = pedidoService.salvarPedidoEnviarNotificacao(idUsuario, pedido);
 
         assertNotNull(pedidoResultado);
@@ -97,6 +107,7 @@ class PedidoServiceImplTest {
     @DisplayName("Deve finalizar pedido")
     @Order(2)
     void deveFinalizarPedido(){
+        when(userDetailsAutenticacaoService.buscarUsuarioAutenticado()).thenReturn(userDetails);
         pedidoService.finalizarPedidoPorIdEnviarNotificacao(idUsuario, idPedido);
 
         verify(pedidoRepository).save(argumentCaptorPedidoFinalizado.capture());
@@ -112,6 +123,7 @@ class PedidoServiceImplTest {
     @DisplayName("Deve cancelar pedido")
     @Order(3)
     void deveCancelarPedido(){
+        when(userDetailsAutenticacaoService.buscarUsuarioAutenticado()).thenReturn(userDetails);
         pedidoService.cancelarPedidoPorIdEnviarNotificacao(idUsuario, idPedido);
 
         verify(pedidoRepository).save(argumentCaptorPedidoCancelado.capture());
