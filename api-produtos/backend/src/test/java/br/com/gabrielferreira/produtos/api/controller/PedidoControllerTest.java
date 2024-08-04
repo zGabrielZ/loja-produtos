@@ -6,6 +6,7 @@ import br.com.gabrielferreira.produtos.api.mapper.ErroPadraoMapper;
 import br.com.gabrielferreira.produtos.api.mapper.PedidoMapper;
 import br.com.gabrielferreira.produtos.domain.model.Pedido;
 import br.com.gabrielferreira.produtos.domain.service.PedidoService;
+import br.com.gabrielferreira.produtos.domain.service.UsuarioService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +28,7 @@ import static br.com.gabrielferreira.produtos.tests.PedidoFactory.*;
 import static org.mockito.Mockito.*;
 
 @WebMvcTest(controllers = PedidoController.class)
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 @ExtendWith(SpringExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PedidoControllerTest {
@@ -49,6 +50,9 @@ class PedidoControllerTest {
 
     @MockBean
     protected ErroPadraoMapper erroPadraoMapper;
+
+    @MockBean
+    protected UsuarioService usuarioService;
 
     private PedidoCreateDTO pedidoCreateDTO;
 

@@ -3,6 +3,7 @@ package br.com.gabrielferreira.produtos.api.controller;
 import br.com.gabrielferreira.produtos.AbstractIntegrationTest;
 import br.com.gabrielferreira.produtos.api.dto.create.PedidoCreateDTO;
 import br.com.gabrielferreira.produtos.commons.dto.NotificacaoDTO;
+import br.com.gabrielferreira.produtos.utils.TokenUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -30,6 +31,8 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
     private static final String URL = "/usuarios";
     private static final MediaType MEDIA_TYPE_JSON = MediaType.APPLICATION_JSON;
+    private static final String AUTHORIZATION = "Authorization";
+    private static final String BEARER = "Bearer ";
 
     @Autowired
     protected MockMvc mockMvc;
@@ -39,6 +42,9 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     protected RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    protected TokenUtils tokenUtils;
 
     private PedidoCreateDTO pedidoCreateDTO;
 
@@ -54,6 +60,8 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
     private Long idPedidoExistenteCancelado;
 
+    private String tokenAdmin;
+
     @BeforeEach
     void setUp(){
         pedidoCreateDTO = criarPedido();
@@ -63,6 +71,7 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
         idPedidoInexistente = -1L;
         idPedidoExistenteFinalizado = 2L;
         idPedidoExistenteCancelado = 3L;
+        tokenAdmin = tokenUtils.gerarToken(mockMvc, "teste111@email.com.br", "@Aa123");
     }
 
     @Test
@@ -74,6 +83,7 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(post(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
@@ -93,6 +103,7 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(post(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
@@ -111,6 +122,7 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(get(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isOk());
@@ -131,6 +143,7 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(get(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isNotFound());
@@ -146,6 +159,7 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(get(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isNotFound());
@@ -161,6 +175,7 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(put(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isBadRequest());
@@ -177,6 +192,7 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(put(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isBadRequest());
@@ -193,6 +209,7 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(put(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isBadRequest());
@@ -209,6 +226,7 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(put(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isBadRequest());
@@ -225,6 +243,7 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(get(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isOk());
@@ -243,6 +262,7 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(post(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .content(jsonBody)
                         .contentType(MEDIA_TYPE_JSON)
                         .accept(MEDIA_TYPE_JSON));
@@ -269,6 +289,7 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(put(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isOk());
@@ -287,6 +308,7 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(put(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isOk());

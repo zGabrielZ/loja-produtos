@@ -1,18 +1,21 @@
 package br.com.gabrielferreira.produtos.domain.service.impl;
 
+import br.com.gabrielferreira.produtos.common.config.security.UserDetailsImpl;
 import br.com.gabrielferreira.produtos.commons.dto.NotificacaoDTO;
+import br.com.gabrielferreira.produtos.domain.exception.ForbiddenException;
 import br.com.gabrielferreira.produtos.domain.exception.NaoEncontradoException;
 import br.com.gabrielferreira.produtos.domain.exception.RegraDeNegocioException;
-import br.com.gabrielferreira.produtos.domain.model.Usuario;
 import br.com.gabrielferreira.produtos.domain.model.ItemPedido;
 import br.com.gabrielferreira.produtos.domain.model.Pedido;
 import br.com.gabrielferreira.produtos.domain.model.Produto;
+import br.com.gabrielferreira.produtos.domain.model.Usuario;
 import br.com.gabrielferreira.produtos.domain.model.enums.PedidoStatusEnum;
 import br.com.gabrielferreira.produtos.domain.publisher.PedidoNotificacaoEventPublisher;
 import br.com.gabrielferreira.produtos.domain.repository.PedidoRepository;
-import br.com.gabrielferreira.produtos.domain.service.UsuarioService;
 import br.com.gabrielferreira.produtos.domain.service.PedidoService;
 import br.com.gabrielferreira.produtos.domain.service.ProdutoService;
+import br.com.gabrielferreira.produtos.domain.service.UserDetailsAutenticacaoService;
+import br.com.gabrielferreira.produtos.domain.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -21,10 +24,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static br.com.gabrielferreira.produtos.common.utils.DataUtils.*;
 import static br.com.gabrielferreira.produtos.common.utils.ConstantesUtils.*;
+import static br.com.gabrielferreira.produtos.common.utils.DataUtils.UTC;
 
 @Service
 @RequiredArgsConstructor
@@ -39,10 +45,13 @@ public class PedidoServiceImpl implements PedidoService {
 
     private final PedidoNotificacaoEventPublisher pedidoNotificacaoEventPublisher;
 
+    private final UserDetailsAutenticacaoService userDetailsAutenticacaoService;
+
     @Transactional
     @Override
     public Pedido salvarPedido(Long idUsuario, Pedido pedido) {
         Usuario usuario = usuarioService.buscarUsuarioPorId(idUsuario);
+        validarUsuarioAutenticadoPedido(idUsuario);
         validarItemPedido(pedido);
 
         for (ItemPedido itemPedido : pedido.getItensPedidos()) {
@@ -70,6 +79,7 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     public Pedido finalizarPedidoPorId(Long idUsuario, Long idPedido) {
         validarUsuarioExistente(idUsuario);
+        validarUsuarioAutenticadoRealizacaoPedido(idUsuario, "Para realizar a finalização do pedido deve ser o próprio usuário ou admin ou funcionário");
         Pedido pedido = buscarPedidoPorIdUsuarioIdPedido(idUsuario, idPedido);
         validarPedidoFinalizado(pedido.getPedidoStatus());
         validarPedidoFinalizarCancelado(pedido.getPedidoStatus());
@@ -85,6 +95,7 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     public Pedido cancelarPedidoPorId(Long idUsuario, Long idPedido) {
         validarUsuarioExistente(idUsuario);
+        validarUsuarioAutenticadoRealizacaoPedido(idUsuario, "Para realizar a cancelação do pedido deve ser o próprio usuário ou admin ou funcionário");
         Pedido pedido = buscarPedidoPorIdUsuarioIdPedido(idUsuario, idPedido);
         validarPedidoCancelado(pedido.getPedidoStatus());
         validarPedidoCancelarFinalizado(pedido.getPedidoStatus());
@@ -99,6 +110,7 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     public Page<Pedido> buscarPedidosPaginados(Long idUsuario, Pageable pageable) {
         validarUsuarioExistente(idUsuario);
+        validarUsuarioAutenticadoRealizacaoPedido(idUsuario, "Para realizar a busca do pedido deve ser o próprio usuário ou admin ou funcionário");
         return pedidoRepository.buscarPedidos(idUsuario, pageable);
     }
 
@@ -195,6 +207,23 @@ public class PedidoServiceImpl implements PedidoService {
     private void validarUsuarioExistente(Long idUsuario){
         if(usuarioService.naoExisteUsuarioPorId(idUsuario)){
             throw new NaoEncontradoException("Usuário não encontrado");
+        }
+    }
+
+    private void validarUsuarioAutenticadoPedido(Long idUsuario){
+        UserDetailsImpl userDetailsAutenticado = userDetailsAutenticacaoService.buscarUsuarioAutenticado();
+        if(!userDetailsAutenticado.getId().equals(idUsuario)){
+            throw new ForbiddenException("Você não tem permissão para realizar a requisição");
+        }
+    }
+
+    private void validarUsuarioAutenticadoRealizacaoPedido(Long idUsuario, String mensagem){
+        UserDetailsImpl userDetailsAutenticado = userDetailsAutenticacaoService.buscarUsuarioAutenticado();
+        boolean isPermissaoRealizarPedido = (userDetailsAutenticado.isAdmin() && !userDetailsAutenticado.getId().equals(idUsuario))
+                || (userDetailsAutenticado.isFuncionario() && !userDetailsAutenticado.getId().equals(idUsuario))
+                || userDetailsAutenticado.getId().equals(idUsuario);
+        if(!isPermissaoRealizarPedido){
+            throw new RegraDeNegocioException(mensagem);
         }
     }
 }

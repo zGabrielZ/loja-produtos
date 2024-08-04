@@ -6,6 +6,7 @@ import br.com.gabrielferreira.produtos.api.dto.create.PedidoCreateDTO;
 import br.com.gabrielferreira.produtos.api.mapper.PedidoMapper;
 import br.com.gabrielferreira.produtos.domain.model.Pedido;
 import br.com.gabrielferreira.produtos.domain.service.PedidoService;
+import br.com.gabrielferreira.produtos.domain.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -35,6 +36,8 @@ public class PedidoController {
     private final PedidoService pedidoService;
 
     private final PedidoMapper pedidoMapper;
+
+    private final UsuarioService usuarioService;
 
     @Operation(summary = "Cadastrar pedido")
     @ApiResponses(value = {
@@ -70,6 +73,7 @@ public class PedidoController {
     @GetMapping("/{id}")
     public ResponseEntity<PedidoResumidoDTO> buscarPedidoPorId(@PathVariable Long idUsuario, @PathVariable Long id){
         log.debug("GET buscarPedidoPorId idUsuario : {}, idPedido : {}", idUsuario, id);
+        usuarioService.validarUsuarioAutenticado(idUsuario);
         Pedido pedido = pedidoService.buscarPedidoPorId(idUsuario, id);
         PedidoResumidoDTO pedidoResumidoDTO = pedidoMapper.toPedidoResumidoDto(pedido);
 

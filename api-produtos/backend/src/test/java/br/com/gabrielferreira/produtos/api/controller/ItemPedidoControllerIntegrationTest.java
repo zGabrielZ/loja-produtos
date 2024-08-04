@@ -1,5 +1,6 @@
 package br.com.gabrielferreira.produtos.api.controller;
 
+import br.com.gabrielferreira.produtos.utils.TokenUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -21,9 +22,14 @@ class ItemPedidoControllerIntegrationTest {
 
     private static final String URL = "/usuarios";
     private static final MediaType MEDIA_TYPE_JSON = MediaType.APPLICATION_JSON;
+    private static final String AUTHORIZATION = "Authorization";
+    private static final String BEARER = "Bearer ";
 
     @Autowired
     protected MockMvc mockMvc;
+
+    @Autowired
+    protected TokenUtils tokenUtils;
 
     private Long idUsuarioExistente;
 
@@ -35,6 +41,8 @@ class ItemPedidoControllerIntegrationTest {
 
     private Long idItemPedidoInexistente;
 
+    private String tokenAdmin;
+
     @BeforeEach
     void setUp(){
         idUsuarioExistente = 1L;
@@ -42,6 +50,7 @@ class ItemPedidoControllerIntegrationTest {
         idPedidoInexistente = -1L;
         idItemPedidoExistente = 1L;
         idItemPedidoInexistente = -1L;
+        tokenAdmin = tokenUtils.gerarToken(mockMvc, "teste111@email.com.br", "@Aa123");
     }
 
     @Test
@@ -53,6 +62,7 @@ class ItemPedidoControllerIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(get(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isOk());
@@ -73,6 +83,7 @@ class ItemPedidoControllerIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(get(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isNotFound());
@@ -88,6 +99,7 @@ class ItemPedidoControllerIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(get(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isNotFound());
@@ -104,6 +116,7 @@ class ItemPedidoControllerIntegrationTest {
 
         ResultActions resultActions = mockMvc
                 .perform(get(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
                         .accept(MEDIA_TYPE_JSON));
 
         resultActions.andExpect(status().isOk());
