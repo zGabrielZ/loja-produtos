@@ -6,7 +6,6 @@ import br.com.gabrielferreira.produtos.api.mapper.ErroPadraoMapper;
 import br.com.gabrielferreira.produtos.api.mapper.PedidoMapper;
 import br.com.gabrielferreira.produtos.domain.model.Pedido;
 import br.com.gabrielferreira.produtos.domain.service.PedidoService;
-import br.com.gabrielferreira.produtos.domain.service.UsuarioService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,14 +17,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+
 import java.math.BigDecimal;
 
+import static br.com.gabrielferreira.produtos.tests.PedidoFactory.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static br.com.gabrielferreira.produtos.tests.PedidoFactory.*;
-import static org.mockito.Mockito.*;
 
 @WebMvcTest(controllers = PedidoController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -50,9 +51,6 @@ class PedidoControllerTest {
 
     @MockBean
     protected ErroPadraoMapper erroPadraoMapper;
-
-    @MockBean
-    protected UsuarioService usuarioService;
 
     private PedidoCreateDTO pedidoCreateDTO;
 

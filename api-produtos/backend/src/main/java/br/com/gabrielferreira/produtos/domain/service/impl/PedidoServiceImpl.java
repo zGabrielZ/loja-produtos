@@ -72,6 +72,7 @@ public class PedidoServiceImpl implements PedidoService {
     @Override
     public Pedido buscarPedidoPorId(Long idUsuario, Long idPedido) {
         validarUsuarioExistente(idUsuario);
+        validarUsuarioAutenticadoRealizacaoPedido(idUsuario, "Para realizar a consulta do pedido deve ser o próprio usuário ou admin ou funcionário");
         return buscarPedidoPorIdUsuarioIdPedido(idUsuario, idPedido);
     }
 
