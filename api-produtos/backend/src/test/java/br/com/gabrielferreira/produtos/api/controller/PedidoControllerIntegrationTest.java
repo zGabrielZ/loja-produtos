@@ -62,16 +62,22 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
 
     private String tokenAdmin;
 
+    private Long idUsuarioNaoAdmin;
+
+    private String tokenCliente;
+
     @BeforeEach
     void setUp(){
         pedidoCreateDTO = criarPedido();
         idUsuarioExistente = 1L;
+        idUsuarioNaoAdmin = 2L;
         idUsuarioInexistente = -1L;
         idPedidoExistente = 1L;
         idPedidoInexistente = -1L;
         idPedidoExistenteFinalizado = 2L;
         idPedidoExistenteCancelado = 3L;
         tokenAdmin = tokenUtils.gerarToken(mockMvc, "teste111@email.com.br", "@Aa123");
+        tokenCliente = tokenUtils.gerarToken(mockMvc, "teste333@email.com.br", "@Aa123");
     }
 
     @Test
@@ -315,5 +321,41 @@ class PedidoControllerIntegrationTest extends AbstractIntegrationTest {
         NotificacaoDTO message = (NotificacaoDTO) rabbitTemplate.receiveAndConvert("ms.produto.notificacaoevent.queue");
         assertNotNull(message);
         assertNotNull(message.getDados().get("dataPedidoCancelado"));
+    }
+
+    @Test
+    @DisplayName("Não deve cadastrar pedido quando usuário autenticado for diferente do id usuário")
+    @Order(14)
+    void naoDeveCadastrarPedidoQuandoUsuarioAutenticadoDiferenteIdUsuario() throws Exception{
+        String url = URL.concat("/").concat(idUsuarioNaoAdmin.toString()).concat("/pedidos");
+        String jsonBody = objectMapper.writeValueAsString(pedidoCreateDTO);
+
+        ResultActions resultActions = mockMvc
+                .perform(post(url)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
+                        .content(jsonBody)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON));
+
+        resultActions.andExpect(status().isForbidden());
+        resultActions.andExpect(jsonPath("$.titulo").value("Proibido"));
+        resultActions.andExpect(jsonPath("$.mensagem").value("Você não tem permissão para realizar a requisição"));
+    }
+
+    @Test
+    @DisplayName("Não deve buscar pedidos paginados quando usuário autenticado for cliente e id usuário diferente cliente")
+    @Order(15)
+    void naoDeveBuscarPedidos() throws Exception {
+        String url = URL.concat("/").concat(idUsuarioExistente.toString()).concat("/pedidos")
+                .concat("?page=0&size=5&sort=id,desc");
+
+        ResultActions resultActions = mockMvc
+                .perform(get(url)
+                        .header(AUTHORIZATION, BEARER + tokenCliente)
+                        .accept(MEDIA_TYPE_JSON));
+
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.titulo").value("Regra de negócio"));
+        resultActions.andExpect(jsonPath("$.mensagem").value("Para realizar a busca do pedido deve ser o próprio usuário ou admin ou funcionário"));
     }
 }

@@ -38,7 +38,7 @@ public class JWTValidatorTokenFilter extends OncePerRequestFilter {
                     autenticarUsuario(claims);
                 }
             } catch (Exception e){
-                log.error("Cannot set User Authentication: {}", e.getMessage());
+                log.error("Erro ao autenticar usuário: {}", e.getMessage());
             }
         }
 

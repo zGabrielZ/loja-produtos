@@ -14,6 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+
 import static br.com.gabrielferreira.produtos.tests.UsuarioFactory.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -60,8 +62,6 @@ class UsuarioControllerIntegrationTest {
     private String tokenFuncionario;
 
     private String tokenCliente;
-
-    // TODO: FAZER MAIS TESTES POIS FOI INCLUIDO MAIS REGRAS DE NEGOCIOS
 
     @BeforeEach
     void setUp(){
@@ -377,5 +377,191 @@ class UsuarioControllerIntegrationTest {
 
         resultActions.andExpect(status().isOk());
         resultActions.andExpect(jsonPath("$.content").exists());
+    }
+
+    @Test
+    @DisplayName("Não deve deletar o proprio usuário quando estiver logado")
+    @Order(18)
+    void naoDeveDeletarProprioUsuario() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(delete(URL.concat("/{id}"), idUsuarioAdminExistente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
+                        .accept(MEDIA_TYPE_JSON));
+
+        resultActions.andExpect(status().isForbidden());
+        resultActions.andExpect(jsonPath("$.mensagem").value("Você não pode excluir a sua própria conta no sistema"));
+    }
+
+    @Test
+    @DisplayName("Não deve buscar usuário por id quando não tiver permissão e ser funcionário")
+    @Order(19)
+    void naoDeveBuscarUsuarioPorIdQuandoNaoTiverPermissaoFuncionario() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(get(URL.concat("/{id}"), idUsuarioAdminExistente)
+                        .header(AUTHORIZATION, BEARER + tokenFuncionario)
+                        .accept(MEDIA_TYPE_JSON));
+
+        resultActions.andExpect(status().isForbidden());
+        resultActions.andExpect(jsonPath("$.mensagem").value("Você não tem permissão para realizar a requisição"));
+    }
+
+    @Test
+    @DisplayName("Não deve buscar usuário por id quando não tiver permissão e ser cliente")
+    @Order(20)
+    void naoDeveBuscarUsuarioPorIdQuandoNaoTiverPermissaoCliente() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(get(URL.concat("/{id}"), idUsuarioAdminExistente)
+                        .header(AUTHORIZATION, BEARER + tokenCliente)
+                        .accept(MEDIA_TYPE_JSON));
+
+        resultActions.andExpect(status().isForbidden());
+        resultActions.andExpect(jsonPath("$.mensagem").value("Você não tem permissão para realizar a requisição"));
+    }
+
+    @Test
+    @DisplayName("Não deve atualizar senha do usuário quando não informar a senha antiga")
+    @Order(21)
+    void naoDeveAtualizarSenhaUsuarioQuandoNaoInformarSenhaAntiga() throws Exception{
+        usuarioSenhaUpdateDTO.setAntigaSenha(null);
+        String jsonBody = objectMapper.writeValueAsString(usuarioSenhaUpdateDTO);
+
+        ResultActions resultActions = mockMvc
+                .perform(put(URL.concat("/{id}").concat("/senha"), idUsuarioAdminExistente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
+                        .content(jsonBody)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON));
+
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.titulo").value("Regra de negócio"));
+        resultActions.andExpect(jsonPath("$.mensagem").value("É necessário informar a senha antiga"));
+    }
+
+    @Test
+    @DisplayName("Não deve cadastrar usuário autenticado quando não informar perfis")
+    @Order(22)
+    void naoDeveCadastrarUsuarioAutenticadoQuandoNaoInformarPerfis() throws Exception{
+        usuarioCreateDTO.setPerfis(new ArrayList<>());
+        String jsonBody = objectMapper.writeValueAsString(usuarioCreateDTO);
+
+        ResultActions resultActions = mockMvc
+                .perform(post(URL)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
+                        .content(jsonBody)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON));
+
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.titulo").value("Regra de negócio"));
+        resultActions.andExpect(jsonPath("$.mensagem").value("Não vai ser possível cadastrar este usuário pois o usuário autenticado não informou o perfil"));
+    }
+
+    @Test
+    @DisplayName("Não deve cadastrar usuário quando o usuário autenticado for cliente ou funcionário")
+    @Order(23)
+    void naoDeveCadastrarUsuarioQuandoUsuarioAutenticadoForClienteOuFuncionario() throws Exception{
+        String jsonBody = objectMapper.writeValueAsString(usuarioCreateDTO);
+
+        ResultActions resultActions = mockMvc
+                .perform(post(URL)
+                        .header(AUTHORIZATION, BEARER + tokenCliente)
+                        .content(jsonBody)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON));
+
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.titulo").value("Regra de negócio"));
+        resultActions.andExpect(jsonPath("$.mensagem").value("Não vai ser possível cadastrar este usuário pois o usuário autenticado não é admin"));
+    }
+
+    @Test
+    @DisplayName("Não deve cadastrar usuário com perfis quando não tiver usuário autenticado")
+    @Order(24)
+    void naoDeveCadastrarUsuarioComPerfisQuandoNaoTiverUsuarioAutenticado() throws Exception{
+        String jsonBody = objectMapper.writeValueAsString(usuarioCreateDTO);
+
+        ResultActions resultActions = mockMvc
+                .perform(post(URL)
+                        .content(jsonBody)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON));
+
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.titulo").value("Regra de negócio"));
+        resultActions.andExpect(jsonPath("$.mensagem").value("Não vai ser possível cadastrar este usuário pois você não tem permissão para incluir perfil para este usuário"));
+    }
+
+    @Test
+    @DisplayName("Deve cadastrar usuário quando não tiver autenticado")
+    @Order(25)
+    void deveCadastrarUsuarioQuandoNaoTiverUsuarioAutenticado() throws Exception{
+        usuarioCreateDTO.setPerfis(new ArrayList<>());
+        String jsonBody = objectMapper.writeValueAsString(usuarioCreateDTO);
+
+        String nomeEsperado = usuarioCreateDTO.getNome();
+        String emailEsperado = usuarioCreateDTO.getEmail();
+
+        ResultActions resultActions = mockMvc
+                .perform(post(URL)
+                        .content(jsonBody)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON));
+
+        resultActions.andExpect(status().isCreated());
+        resultActions.andExpect(jsonPath("$.id").exists());
+        resultActions.andExpect(jsonPath("$.nome").value(nomeEsperado));
+        resultActions.andExpect(jsonPath("$.email").value(emailEsperado));
+        resultActions.andExpect(jsonPath("$.dataInclusao").exists());
+        resultActions.andExpect(jsonPath("$.perfis").exists());
+    }
+
+    @Test
+    @DisplayName("Não deve atualizar usuário quando usuário autenticado for admin e não informar perfil")
+    @Order(26)
+    void naoDeveAtualizarUsuarioQuandoUsuarioAutenticadoAdminSemPerfil() throws Exception{
+        usuarioUpdateDTO.setPerfis(new ArrayList<>());
+        String jsonBody = objectMapper.writeValueAsString(usuarioUpdateDTO);
+
+        ResultActions resultActions = mockMvc
+                .perform(put(URL.concat("/{id}"), idUsuarioFuncionarioExistente)
+                        .header(AUTHORIZATION, BEARER + tokenAdmin)
+                        .content(jsonBody)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON));
+
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.titulo").value("Regra de negócio"));
+        resultActions.andExpect(jsonPath("$.mensagem").value("Não vai ser possível atualizar este usuário pois o usuário autenticado não informou o perfil"));
+    }
+
+    @Test
+    @DisplayName("Não deve atualizar usuário quando usuário autenticado não for admin e informar perfil")
+    @Order(26)
+    void naoDeveAtualizarUsuarioQuandoUsuarioAutenticadoNaoAdminComPerfil() throws Exception{
+        String jsonBody = objectMapper.writeValueAsString(usuarioUpdateDTO);
+
+        ResultActions resultActions = mockMvc
+                .perform(put(URL.concat("/{id}"), idUsuarioFuncionarioExistente)
+                        .header(AUTHORIZATION, BEARER + tokenFuncionario)
+                        .content(jsonBody)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON));
+
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.titulo").value("Regra de negócio"));
+        resultActions.andExpect(jsonPath("$.mensagem").value("Não vai ser possível atualizar este usuário pois o usuário autenticado não tem permissão de incluir ou alterar perfil"));
+    }
+
+    @Test
+    @DisplayName("Não deve deletar o usuário quando for cliente")
+    @Order(27)
+    void naoDeveDeletarUsuarioQuandoForCliente() throws Exception {
+        ResultActions resultActions = mockMvc
+                .perform(delete(URL.concat("/{id}"), idUsuarioAdminExistente)
+                        .header(AUTHORIZATION, BEARER + tokenCliente)
+                        .accept(MEDIA_TYPE_JSON));
+
+        resultActions.andExpect(status().isForbidden());
+        resultActions.andExpect(jsonPath("$.mensagem").value("Você não tem permissão para realizar a requisição"));
     }
 }

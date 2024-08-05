@@ -43,6 +43,8 @@ class ItemPedidoControllerIntegrationTest {
 
     private String tokenAdmin;
 
+    private String tokenCliente;
+
     @BeforeEach
     void setUp(){
         idUsuarioExistente = 1L;
@@ -51,6 +53,7 @@ class ItemPedidoControllerIntegrationTest {
         idItemPedidoExistente = 1L;
         idItemPedidoInexistente = -1L;
         tokenAdmin = tokenUtils.gerarToken(mockMvc, "teste111@email.com.br", "@Aa123");
+        tokenCliente = tokenUtils.gerarToken(mockMvc, "teste333@email.com.br", "@Aa123");
     }
 
     @Test
@@ -121,5 +124,23 @@ class ItemPedidoControllerIntegrationTest {
 
         resultActions.andExpect(status().isOk());
         resultActions.andExpect(jsonPath("$.content").exists());
+    }
+
+    @Test
+    @DisplayName("Não deve buscar item pedidos paginados quando usuário autenticado for cliente e id usuário diferente cliente")
+    @Order(5)
+    void naoDeveBuscarPedidosPaginados() throws Exception {
+        String url = URL.concat("/").concat(idUsuarioExistente.toString()).concat("/pedidos/")
+                .concat(idPedidoExistente.toString()).concat("/itens")
+                .concat("?page=0&size=5&sort=id,desc");
+
+        ResultActions resultActions = mockMvc
+                .perform(get(url)
+                        .header(AUTHORIZATION, BEARER + tokenCliente)
+                        .accept(MEDIA_TYPE_JSON));
+
+        resultActions.andExpect(status().isBadRequest());
+        resultActions.andExpect(jsonPath("$.titulo").value("Regra de negócio"));
+        resultActions.andExpect(jsonPath("$.mensagem").value("Para realizar a busca dos itens dos pedidos deve ser o próprio usuário ou admin ou funcionário"));
     }
 }
