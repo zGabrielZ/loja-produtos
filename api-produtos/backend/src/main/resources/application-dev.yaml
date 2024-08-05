@@ -48,9 +48,15 @@ jwt:
   secret: ${JWT_SECRET:b(6_jX4*NDhHQxGk8#7wA96bf?._h(EyRtqT8z*@K#6Ux3a!t+}
   expiration: ${JWT_EXPIRATION:3600000}
 
+produtos:
+  service:
+    registry:
+      username: serviceregistry
+      password: produtos123sr
+
 eureka:
   client:
     service-url:
-      default-zone: 'http://localhost:8761/eureka'
+      defaultZone: 'http://${produtos.service.registry.username}:${produtos.service.registry.password}@localhost:8761/eureka'
   instance:
     hostname: localhost

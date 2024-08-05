@@ -5,7 +5,15 @@ spring:
   application:
     name: produtos-service-registry
 
+produtos:
+  service:
+    registry:
+      username: serviceregistry
+      password: produtos123sr
+
 eureka:
   client:
     register-with-eureka: false # Não se registre no eureka
     fetch-registry: false # Não buscar um registor no eureka
+    service-url:
+      defaultZone: 'http://${produtos.service.registry.username}:${produtos.service.registry.password}@localhost:8761/eureka'

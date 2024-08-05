@@ -17,11 +17,16 @@ spring:
             predicates:
               - Path=/api-notificacao/**
 
+produtos:
+  service:
+    registry:
+      username: serviceregistry
+      password: produtos123sr
 
 eureka:
   client:
     service-url:
-      default-zone: 'http://localhost:8761/eureka'
+      defaultZone: 'http://${produtos.service.registry.username}:${produtos.service.registry.password}@localhost:8761/eureka'
   instance:
     hostname: localhost
 
