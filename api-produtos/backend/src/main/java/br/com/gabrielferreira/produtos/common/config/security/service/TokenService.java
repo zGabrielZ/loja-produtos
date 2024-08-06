@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 import static br.com.gabrielferreira.produtos.common.utils.DataUtils.UTC;
 
@@ -37,12 +39,18 @@ public class TokenService {
         log.info("Data atual do token gerado em UTC {}", dataAtual);
         log.info("Data expiração do token gerado em UTC {}", dataExpiracao);
 
+        String perfis = userDetailsImpl.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
         return Jwts.builder()
                 .issuer("API Produtos")
                 .subject("API de Produtos")
                 .issuedAt(Date.from(dataAtual.toInstant()))
                 .expiration(Date.from(dataExpiracao.toInstant()))
                 .claim("idUsuario", userDetailsImpl.getId())
+                .claim("email", userDetailsImpl.getEmail())
+                .claim("perfis", perfis)
                 .signWith(secretKey)
                 .compact();
     }
