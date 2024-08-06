@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -34,6 +35,12 @@ public class ApiExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErroPadrao> erroException(Exception e, HttpServletRequest request){
         log.error("erroException message : {}, requestUrl : {}", e.getMessage(), request.getRequestURI());
+        if(e instanceof AccessDeniedException){
+            HttpStatus httpStatus = HttpStatus.FORBIDDEN;
+            ErroPadrao erroPadrao = erroPadraoMapper.toErroPadrao(toFusoPadraoSistema(ZonedDateTime.now()), httpStatus.value(), "Proibido", "Você não tem a permissão de realizar esta ação", request.getRequestURI());
+            return ResponseEntity.status(httpStatus).body(erroPadrao);
+        }
+
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         ErroPadrao erroPadrao = erroPadraoMapper.toErroPadrao(toFusoPadraoSistema(ZonedDateTime.now()), httpStatus.value(), "Erro inesperado", "Ocorreu um erro inesperado no sistema, tente mais tarde", request.getRequestURI());
         return ResponseEntity.status(httpStatus).body(erroPadrao);

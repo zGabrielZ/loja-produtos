@@ -59,3 +59,6 @@ broker:
 logging:
   level:
     br.com.gabrielferreira.produtos: TRACE
+
+jwt:
+  secret: ${JWT_SECRET:b(6_jX4*NDhHQxGk8#7wA96bf?._h(EyRtqT8z*@K#6Ux3a!t+}
