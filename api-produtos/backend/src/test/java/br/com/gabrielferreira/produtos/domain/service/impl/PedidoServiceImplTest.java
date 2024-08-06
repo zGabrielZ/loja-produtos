@@ -1,6 +1,7 @@
 package br.com.gabrielferreira.produtos.domain.service.impl;
 
 import br.com.gabrielferreira.produtos.common.config.security.UserDetailsImpl;
+import br.com.gabrielferreira.produtos.common.config.security.service.UserDetailsAutenticacaoService;
 import br.com.gabrielferreira.produtos.domain.model.Pedido;
 import br.com.gabrielferreira.produtos.domain.model.Produto;
 import br.com.gabrielferreira.produtos.domain.model.Usuario;
@@ -8,7 +9,6 @@ import br.com.gabrielferreira.produtos.domain.model.enums.PedidoStatusEnum;
 import br.com.gabrielferreira.produtos.domain.publisher.PedidoNotificacaoEventPublisher;
 import br.com.gabrielferreira.produtos.domain.repository.PedidoRepository;
 import br.com.gabrielferreira.produtos.domain.service.ProdutoService;
-import br.com.gabrielferreira.produtos.domain.service.UserDetailsAutenticacaoService;
 import br.com.gabrielferreira.produtos.domain.service.UsuarioService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;

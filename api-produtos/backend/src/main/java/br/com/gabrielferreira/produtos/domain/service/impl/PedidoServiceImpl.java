@@ -1,6 +1,7 @@
 package br.com.gabrielferreira.produtos.domain.service.impl;
 
 import br.com.gabrielferreira.produtos.common.config.security.UserDetailsImpl;
+import br.com.gabrielferreira.produtos.common.config.security.service.UserDetailsAutenticacaoService;
 import br.com.gabrielferreira.produtos.commons.dto.NotificacaoDTO;
 import br.com.gabrielferreira.produtos.domain.exception.ForbiddenException;
 import br.com.gabrielferreira.produtos.domain.exception.NaoEncontradoException;
@@ -14,7 +15,6 @@ import br.com.gabrielferreira.produtos.domain.publisher.PedidoNotificacaoEventPu
 import br.com.gabrielferreira.produtos.domain.repository.PedidoRepository;
 import br.com.gabrielferreira.produtos.domain.service.PedidoService;
 import br.com.gabrielferreira.produtos.domain.service.ProdutoService;
-import br.com.gabrielferreira.produtos.domain.service.UserDetailsAutenticacaoService;
 import br.com.gabrielferreira.produtos.domain.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;

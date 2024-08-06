@@ -1,12 +1,12 @@
 package br.com.gabrielferreira.produtos.domain.service.impl;
 
 import br.com.gabrielferreira.produtos.common.config.security.UserDetailsImpl;
+import br.com.gabrielferreira.produtos.common.config.security.service.UserDetailsAutenticacaoService;
 import br.com.gabrielferreira.produtos.domain.exception.NaoEncontradoException;
 import br.com.gabrielferreira.produtos.domain.exception.RegraDeNegocioException;
 import br.com.gabrielferreira.produtos.domain.model.ItemPedido;
 import br.com.gabrielferreira.produtos.domain.repository.ItemPedidoRepository;
 import br.com.gabrielferreira.produtos.domain.service.ItemPedidoService;
-import br.com.gabrielferreira.produtos.domain.service.UserDetailsAutenticacaoService;
 import br.com.gabrielferreira.produtos.domain.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

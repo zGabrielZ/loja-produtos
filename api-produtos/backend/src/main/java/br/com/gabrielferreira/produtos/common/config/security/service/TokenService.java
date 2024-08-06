@@ -1,7 +1,6 @@
-package br.com.gabrielferreira.produtos.domain.service.impl;
+package br.com.gabrielferreira.produtos.common.config.security.service;
 
 import br.com.gabrielferreira.produtos.common.config.security.UserDetailsImpl;
-import br.com.gabrielferreira.produtos.domain.service.TokenService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -15,22 +14,21 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-import static br.com.gabrielferreira.produtos.common.utils.DataUtils.*;
+import static br.com.gabrielferreira.produtos.common.utils.DataUtils.UTC;
 
 @Service
 @Log4j2
-public class TokenServiceImpl implements TokenService {
+public class TokenService {
 
     private final String chave;
 
     private final String expiracao;
 
-    public TokenServiceImpl(@Value("${jwt.secret}") String chave, @Value("${jwt.expiration}") String expiracao) {
+    public TokenService(@Value("${jwt.secret}") String chave, @Value("${jwt.expiration}") String expiracao) {
         this.chave = chave;
         this.expiracao = expiracao;
     }
 
-    @Override
     public String gerarToken(UserDetailsImpl userDetailsImpl) {
         SecretKey secretKey = getSecret();
         ZonedDateTime dataAtual = ZonedDateTime.now(UTC);
@@ -49,7 +47,6 @@ public class TokenServiceImpl implements TokenService {
                 .compact();
     }
 
-    @Override
     public boolean isTokenValido(String token) {
         try {
             extrairTodoClaims(token);
@@ -69,7 +66,6 @@ public class TokenServiceImpl implements TokenService {
         return false;
     }
 
-    @Override
     public Claims extrairTodoClaims(String token) {
         return Jwts.parser().verifyWith(getSecret()).build().parseSignedClaims(token)
                 .getPayload();

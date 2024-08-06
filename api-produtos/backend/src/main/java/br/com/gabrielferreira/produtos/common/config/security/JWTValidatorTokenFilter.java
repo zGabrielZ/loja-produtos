@@ -1,7 +1,7 @@
 package br.com.gabrielferreira.produtos.common.config.security;
 
-import br.com.gabrielferreira.produtos.domain.service.TokenService;
-import br.com.gabrielferreira.produtos.domain.service.UserDetailsAutenticacaoService;
+import br.com.gabrielferreira.produtos.common.config.security.service.TokenService;
+import br.com.gabrielferreira.produtos.common.config.security.service.UserDetailsAutenticacaoService;
 import io.jsonwebtoken.Claims;
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.FilterChain;

@@ -1,9 +1,9 @@
 package br.com.gabrielferreira.produtos.common.config.security;
 
+import br.com.gabrielferreira.produtos.common.config.security.service.UserDetailsAutenticacaoService;
 import br.com.gabrielferreira.produtos.domain.exception.RegraDeNegocioException;
-import br.com.gabrielferreira.produtos.domain.service.UserDetailsAutenticacaoService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
+@Log4j2
 public class AppAuthenticationProvider implements AuthenticationProvider {
 
     private final UserDetailsAutenticacaoService usuarioAutenticacaoService;

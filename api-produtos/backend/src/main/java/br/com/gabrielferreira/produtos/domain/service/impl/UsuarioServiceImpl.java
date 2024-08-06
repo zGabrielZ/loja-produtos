@@ -1,6 +1,7 @@
 package br.com.gabrielferreira.produtos.domain.service.impl;
 
 import br.com.gabrielferreira.produtos.common.config.security.UserDetailsImpl;
+import br.com.gabrielferreira.produtos.common.config.security.service.UserDetailsAutenticacaoService;
 import br.com.gabrielferreira.produtos.domain.exception.ForbiddenException;
 import br.com.gabrielferreira.produtos.domain.exception.NaoEncontradoException;
 import br.com.gabrielferreira.produtos.domain.exception.RegraDeNegocioException;
@@ -8,7 +9,6 @@ import br.com.gabrielferreira.produtos.domain.model.Perfil;
 import br.com.gabrielferreira.produtos.domain.model.Usuario;
 import br.com.gabrielferreira.produtos.domain.repository.UsuarioRepository;
 import br.com.gabrielferreira.produtos.domain.service.PerfilService;
-import br.com.gabrielferreira.produtos.domain.service.UserDetailsAutenticacaoService;
 import br.com.gabrielferreira.produtos.domain.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.StringUtils;

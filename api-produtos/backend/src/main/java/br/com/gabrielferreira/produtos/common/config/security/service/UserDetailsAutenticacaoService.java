@@ -1,4 +1,4 @@
-package br.com.gabrielferreira.produtos.domain.service.impl;
+package br.com.gabrielferreira.produtos.common.config.security.service;
 
 import br.com.gabrielferreira.produtos.common.config.security.PerfilDetailsImpl;
 import br.com.gabrielferreira.produtos.common.config.security.UserDetailsImpl;
@@ -7,7 +7,6 @@ import br.com.gabrielferreira.produtos.domain.exception.UnauthorizedException;
 import br.com.gabrielferreira.produtos.domain.mapper.UserDetailsMapper;
 import br.com.gabrielferreira.produtos.domain.model.Usuario;
 import br.com.gabrielferreira.produtos.domain.repository.UsuarioRepository;
-import br.com.gabrielferreira.produtos.domain.service.UserDetailsAutenticacaoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.Authentication;
@@ -24,13 +23,12 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Log4j2
-public class UserDetailsAutenticacaoServiceImpl implements UserDetailsAutenticacaoService, UserDetailsService {
+public class UserDetailsAutenticacaoService implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
 
     private final UserDetailsMapper userDetailsMapper;
 
-    @Override
     public UserDetailsImpl buscarUsuarioAutenticado() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -45,7 +43,6 @@ public class UserDetailsAutenticacaoServiceImpl implements UserDetailsAutenticac
         }
     }
 
-    @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Optional<Usuario> usuarioOpt = usuarioRepository.buscarUsuarioComPerfisPorEmail(email);
         if(usuarioOpt.isEmpty()){
@@ -56,7 +53,6 @@ public class UserDetailsAutenticacaoServiceImpl implements UserDetailsAutenticac
         return userDetailsMapper.toUserDetails(usuarioOpt.get());
     }
 
-    @Override
     public UserDetailsImpl buscarUsuarioPorId(Long id) {
         Optional<Usuario> usuarioOpt = usuarioRepository.buscarUsuarioPorId(id);
         if(usuarioOpt.isEmpty()){
