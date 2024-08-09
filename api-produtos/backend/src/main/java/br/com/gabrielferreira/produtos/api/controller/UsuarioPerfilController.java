@@ -39,6 +39,10 @@ public class UsuarioPerfilController {
             @ApiResponse(responseCode = "200", description = "Perfil encontrado",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = PerfilDTO.class)) }),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
             @ApiResponse(responseCode = "404", description = "Recurso não encontrado",
                     content = @Content)
     })
@@ -59,6 +63,10 @@ public class UsuarioPerfilController {
             @ApiResponse(responseCode = "200", description = "Perfis encontrados",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = PerfilDTO.class)) }),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
             @ApiResponse(responseCode = "404", description = "Recurso não encontrado",
                     content = @Content)
     })

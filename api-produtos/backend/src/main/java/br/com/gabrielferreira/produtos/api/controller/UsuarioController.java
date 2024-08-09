@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -47,7 +48,11 @@ public class UsuarioController {
             @ApiResponse(responseCode = "400", description = "Regra de negócio",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Perfil não encontrado",
-                    content = @Content)
+                    content = @Content),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
     })
     @PostMapping
     public ResponseEntity<UsuarioDTO> cadastrarUsuario(@Valid @RequestBody UsuarioCreateDTO usuarioCreateDTO){
@@ -69,7 +74,11 @@ public class UsuarioController {
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = UsuarioResumidoDTO.class)) }),
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado",
-                    content = @Content)
+                    content = @Content),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
     })
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioResumidoDTO> buscarUsuarioPorId(@PathVariable Long id){
@@ -91,7 +100,11 @@ public class UsuarioController {
             @ApiResponse(responseCode = "400", description = "Regra de negócio",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado",
-                    content = @Content)
+                    content = @Content),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
     })
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioDTO> atualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioUpdateDTO usuarioUpdateDTO){
@@ -114,7 +127,11 @@ public class UsuarioController {
             @ApiResponse(responseCode = "400", description = "Regra de negócio",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado",
-                    content = @Content)
+                    content = @Content),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
     })
     @PutMapping("/{id}/senha")
     public ResponseEntity<UsuarioDTO> atualizarSenhaUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioSenhaUpdateDTO usuarioSenhaUpdateDTO){
@@ -134,7 +151,11 @@ public class UsuarioController {
             @ApiResponse(responseCode = "204", description = "Usuário deletado",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado",
-                    content = @Content)
+                    content = @Content),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarUsuarioPorId(@PathVariable Long id){
@@ -151,10 +172,14 @@ public class UsuarioController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuários encontrados",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UsuarioResumidoDTO.class)) })
+                            schema = @Schema(implementation = UsuarioResumidoDTO.class)) }),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
     })
     @GetMapping
-    public ResponseEntity<Page<UsuarioResumidoDTO>> buscarUsuariosPaginados(@PageableDefault(size = 5, sort = "dataInclusao", direction = Sort.Direction.DESC) Pageable pageable,
+    public ResponseEntity<Page<UsuarioResumidoDTO>> buscarUsuariosPaginados(@ParameterObject @PageableDefault(size = 5, sort = "dataInclusao", direction = Sort.Direction.DESC) Pageable pageable,
                                                                             @RequestParam(required = false) String nome,
                                                                             @RequestParam(required = false) String email){
         log.debug("GET buscarUsuariosPaginados nome : {}, email : {}, pageable : {}", nome, email, pageable);

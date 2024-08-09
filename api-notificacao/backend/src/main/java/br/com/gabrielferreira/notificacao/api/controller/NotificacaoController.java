@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -39,12 +40,16 @@ public class NotificacaoController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Notificações encontrados",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = NotificacaoResumidoDTO.class)) })
+                            schema = @Schema(implementation = NotificacaoResumidoDTO.class)) }),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
     })
     @GetMapping
     public ResponseEntity<Page<NotificacaoResumidoDTO>> buscarNotificacoesPaginados(String titulo,
                                                                                     NotificacaoStatusEnum status,
-                                                                                    @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable){
+                                                                                    @ParameterObject @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.DESC) Pageable pageable){
         log.debug("GET buscarNotificacoesPaginados titulo : {}, status : {}, pageable : {}", titulo, status, pageable);
         Page<Notificacao> notificacoes = notificacaoService.buscarNotificacoes(titulo, status, pageable);
         Page<NotificacaoResumidoDTO> notificacaoResumidoDTOS = notificacaoDTOMapper.toNotificacoesDtos(notificacoes);

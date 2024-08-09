@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -38,11 +39,15 @@ public class HistoricoProdutoController {
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = HistoricoProdutoDTO.class)) }),
             @ApiResponse(responseCode = "404", description = "Produto não encontrado",
-                    content = @Content)
+                    content = @Content),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
     })
     @GetMapping
     public ResponseEntity<Page<HistoricoProdutoDTO>> buscarHistoricoProdutosPaginados(@PathVariable Long idProduto,
-                                                                                      @PageableDefault(size = 5, sort = "dataInclusao", direction = Sort.Direction.DESC) Pageable pageable){
+                                                                                      @ParameterObject @PageableDefault(size = 5, sort = "dataInclusao", direction = Sort.Direction.DESC) Pageable pageable){
         log.debug("GET buscarHistoricoProdutosPaginados idProduto : {}, pageable : {}", idProduto, pageable);
         Page<HistoricoProduto> historicoProdutos = historicoProdutoService.buscarHistoricoPaginadosPorIdProduto(idProduto, pageable);
         Page<HistoricoProdutoDTO> historicoProdutoDTOS = historicoProdutoMapper.toHistoricoProdutosDtos(historicoProdutos);
@@ -57,7 +62,11 @@ public class HistoricoProdutoController {
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = HistoricoProdutoDTO.class)) }),
             @ApiResponse(responseCode = "404", description = "Produto não encontrado",
-                    content = @Content)
+                    content = @Content),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
     })
     @GetMapping("/{id}")
     public ResponseEntity<HistoricoProdutoDTO> buscarProdutoPorId(@PathVariable Long idProduto, @PathVariable Long id){

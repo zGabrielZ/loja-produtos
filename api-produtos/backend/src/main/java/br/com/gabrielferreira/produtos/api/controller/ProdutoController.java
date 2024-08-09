@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -44,6 +45,10 @@ public class ProdutoController {
             @ApiResponse(responseCode = "201", description = "Produto cadastrado",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ProdutoDTO.class)) }),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
             @ApiResponse(responseCode = "400", description = "Regra de negócio",
                     content = @Content)
     })
@@ -88,6 +93,10 @@ public class ProdutoController {
                             schema = @Schema(implementation = ProdutoDTO.class)) }),
             @ApiResponse(responseCode = "400", description = "Regra de negócio",
                     content = @Content),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
             @ApiResponse(responseCode = "401", description = "Produto não encontrado",
                     content = @Content)
     })
@@ -107,6 +116,10 @@ public class ProdutoController {
     @Operation(summary = "Deletar produto por id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Produto deletado",
+                    content = @Content),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Produto não encontrado",
                     content = @Content)
@@ -128,7 +141,7 @@ public class ProdutoController {
                             schema = @Schema(implementation = ProdutoDTO.class)) })
     })
     @GetMapping
-    public ResponseEntity<Page<ProdutoDTO>> buscarProdutosPaginados(@PageableDefault(size = 5, sort = "dataInclusao", direction = Sort.Direction.DESC) Pageable pageable,
+    public ResponseEntity<Page<ProdutoDTO>> buscarProdutosPaginados(@ParameterObject @PageableDefault(size = 5, sort = "dataInclusao", direction = Sort.Direction.DESC) Pageable pageable,
                                                                     @RequestParam(required = false) String nome,
                                                                     @RequestParam(required = false) BigDecimal preco){
         log.debug("GET buscarProdutosPaginados nome : {}, preco : {}, pageable : {}", nome, preco, pageable);

@@ -46,7 +46,9 @@ public class AutenticacaoController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuário autenticado",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = TokenDTO.class)) })
+                            schema = @Schema(implementation = TokenDTO.class)) }),
+            @ApiResponse(responseCode = "400", description = "Regra de negócio",
+                    content = @Content),
     })
     @PostMapping
     public ResponseEntity<TokenDTO> autenticar(@Valid @RequestBody AuthDTO authDTO){
@@ -65,7 +67,9 @@ public class AutenticacaoController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Token atualizado",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = TokenDTO.class)) })
+                            schema = @Schema(implementation = TokenDTO.class)) }),
+            @ApiResponse(responseCode = "400", description = "Regra de negócio",
+                    content = @Content),
     })
     @PostMapping("/refresh-token")
     public ResponseEntity<TokenDTO> refreshToken(){

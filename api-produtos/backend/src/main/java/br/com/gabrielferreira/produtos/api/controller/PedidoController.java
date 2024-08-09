@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -41,7 +42,11 @@ public class PedidoController {
             @ApiResponse(responseCode = "201", description = "Pedido cadastrado",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = PedidoDTO.class)) }),
-            @ApiResponse(responseCode = "401", description = "Recurso não encontrado",
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = "Recurso não encontrado",
                     content = @Content)
     })
     @PostMapping
@@ -64,6 +69,10 @@ public class PedidoController {
             @ApiResponse(responseCode = "200", description = "Pedido encontrado",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = PedidoResumidoDTO.class)) }),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
             @ApiResponse(responseCode = "404", description = "Pedido não encontrado",
                     content = @Content)
     })
@@ -84,8 +93,12 @@ public class PedidoController {
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Pedido não encontrado",
                     content = @Content),
-            @ApiResponse(responseCode = "401", description = "Regra de negócio",
-                    content = @Content)
+            @ApiResponse(responseCode = "400", description = "Regra de negócio",
+                    content = @Content),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
     })
     @PutMapping("/{id}/finalizar")
     public ResponseEntity<Void> finalizarPedidoPorId(@PathVariable Long idUsuario, @PathVariable Long id){
@@ -103,8 +116,12 @@ public class PedidoController {
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Pedido não encontrado",
                     content = @Content),
-            @ApiResponse(responseCode = "401", description = "Regra de negócio",
-                    content = @Content)
+            @ApiResponse(responseCode = "400", description = "Regra de negócio",
+                    content = @Content),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
     })
     @PutMapping("/{id}/cancelar")
     public ResponseEntity<Void> cancelarPedidoPorId(@PathVariable Long idUsuario, @PathVariable Long id){
@@ -121,12 +138,16 @@ public class PedidoController {
             @ApiResponse(responseCode = "200", description = "Pedidos encontrados",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = PedidoResumidoDTO.class)) }),
-            @ApiResponse(responseCode = "401", description = "Usuário não encontrado",
-                    content = @Content)
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado",
+                    content = @Content),
+            @ApiResponse(responseCode = "401", description = "Recurso não autorizado",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Recurso não permitido",
+                    content = @Content),
     })
     @GetMapping
     public ResponseEntity<Page<PedidoResumidoDTO>> buscarPedidosPaginados(@PathVariable Long idUsuario,
-                                                                          @PageableDefault(size = 5, sort = "dataInclusao", direction = Sort.Direction.DESC) Pageable pageable){
+                                                                          @ParameterObject @PageableDefault(size = 5, sort = "dataInclusao", direction = Sort.Direction.DESC) Pageable pageable){
         log.debug("GET buscarPedidosPaginados idUsuario : {}, pageable : {}", idUsuario, pageable);
         Page<Pedido> pedidos = pedidoService.buscarPedidosPaginados(idUsuario, pageable);
         Page<PedidoResumidoDTO> pedidoResumidoDTOS = pedidoMapper.toPedidoResumidoDtos(pedidos);
